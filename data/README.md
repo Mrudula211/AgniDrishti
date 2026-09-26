@@ -16,4 +16,6 @@ Current contents (2026-09-26):
 - `external/nasa-igbt-accelerated-aging/` — **EXTERNAL — NASA Open Data — IGBT**: original archive + `extracted/`.
 - `external/nasa-mosfet-thermal-overstress/` — **EXTERNAL — NASA PCoE**: original archive + `extracted/`.
 
+- `synthetic/development/` — **SYNTHETIC** development dataset v1 (CSV + manifest), regenerable with `python scripts/generate_synthetic.py`; record in `docs/research/datasets/data-sources.md` DS-04.
+
 Provenance, checksums and limitations: `docs/research/datasets/external-datasets.md`. No official PS data exists; `raw/` is empty by design.

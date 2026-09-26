@@ -22,7 +22,8 @@ synthetic) and results are never pooled across categories.
 | Data | Whatever dataset is being introduced |
 | Method | Schema, units, missingness, lot sizes, value resolution (MAD = 0 risk), distributions per checkpoint, label prevalence |
 | Output | Updated data dictionary + assumption statuses |
-| Result | TBD — experiment not yet executed |
+| Result — synthetic development v1 (category: **synthetic**) | Audit **passed** 2026-09-26 (`src/agnidrish/audit.py`); statistics in the git-ignored manifest `data/synthetic/development/synthetic_development_v1_seed20260926.manifest.json`; version record in data-sources.md DS-04. Dataset statistics only — no method was evaluated. |
+| Result — official / external data | TBD — experiment not yet executed |
 
 ## E1 — Static specification screening
 

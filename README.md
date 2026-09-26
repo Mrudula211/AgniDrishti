@@ -2,9 +2,9 @@
 
 **SIH 2026 — Problem Statement 26170: AI-Driven Anomaly Detection in Component Burn-In & Screening**
 
-> **Status: P1 — data foundation (started 2026-09-26).** Only the canonical schema and data-quality
-> checks are being implemented; no model, prediction or decision logic exists.
-> No synthetic dataset has been generated and no official PS dataset exists. Two **external** NASA datasets
+> **Status: P1 — data foundation (started 2026-09-26).** Implemented: canonical schema, data-quality gate,
+> synthetic data generator (development families only) and E0 audit. No model, prediction or decision logic exists.
+> A **synthetic** development dataset exists (methodology validation only); no official PS dataset exists. Two **external** NASA datasets
 > (MOSFET, IGBT) have been downloaded for methodology research only. No experiment has been run.
 > All metrics in this repository read "TBD — experiment not yet executed."
 
@@ -102,6 +102,7 @@ Python 3.11+. Dependencies and their reasons are in `pyproject.toml`.
 ```
 pip install -e ".[dev]"
 python -m pytest
+python scripts/generate_synthetic.py   # SYNTHETIC development data + E0 audit
 ```
 
 ## Important limitations

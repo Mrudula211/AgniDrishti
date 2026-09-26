@@ -34,8 +34,9 @@ Scope of P1 (narrow, in this order):
 
 Still NOT allowed in P1 until their gates are met:
 
-- Synthetic data generator — until held-out families 19–20 are sealed and the
-  sweep grids are written (`synthetic-data-design.md` §6–§7).
+- ~~Synthetic data generator~~ — gate met 2026-09-26 (families sealed, grids
+  pre-registered); development generator + E0 audit implemented (FR-17–FR-19).
+  Never create or reconstruct held-out families 19–20.
 - Experiments E1–E6 — until success-criterion bounds and the target recall R*
   (ADR-005) are pre-registered.
 - Models, prediction, decision engine, app, API, dashboard, notebooks.

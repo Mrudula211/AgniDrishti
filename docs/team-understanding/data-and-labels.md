@@ -8,7 +8,7 @@ Status: Draft · Last updated: 2026-09-26
 |---|---|---|---|
 | **Official** | Data from SIH / ISRO for PS 26170 | **No.** The PS dataset link is empty; evaluators hold hidden answers | "Official PS data" |
 | **External** | Public datasets from others (NASA MOSFET, NASA IGBT) | Yes, downloaded and checked | "External NASA data" — **never** ISRO/SIH data |
-| **Synthetic** | Data we will generate to mimic the PS shape | Not yet (design under review) | "Synthetic data" — never "real" |
+| **Synthetic** | Data we generate to mimic the PS shape | Yes — development v1 (54 lots, development families only) | "Synthetic data" — never "real" |
 | **Illustrative** | Example numbers in docs (e.g. 10/45/50 µA) | — | "Illustrative" — never a result |
 
 Every chart, table and slide must say which kind it uses. Decided in [ADR-003](../decisions/ADR-003-dataset-strategy.md).

@@ -18,7 +18,7 @@ experiment → record → document.
 | B-08 | Drift-rate formula not given (GAP-02) | **Closed 2026-09-26** — ADR-002 | Team |
 | B-05 | Prior-art items unverified | **Partly done 2026-09-26** (S-01…S-17); remaining UV items in literature-review §2 | Team |
 | B-06 | Operating constraint on review rate unknown (GAP-08) | **Closed 2026-09-26** — [ADR-005](../decisions/ADR-005-operating-point.md) recall-first policy; R* to be pre-registered before E6 | Team |
-| B-09 | Synthetic generator design | **Design approved 2026-09-26**; remaining: name owner and seal families 19–20 ([synthetic-data-design.md](../research/datasets/synthetic-data-design.md) §7) | Team |
+| B-09 | Synthetic generator | **Closed 2026-09-26** — families 19–20 sealed outside the repo, grids pre-registered, generator + E0 audit built ([synthetic-data-design.md](../research/datasets/synthetic-data-design.md) §7–§9) | — |
 | B-10 | ~~No git repository~~ | **Closed** — repository exists with remote `origin` (GitHub); work on branches per CLAUDE §26 | — |
 
 All gaps and risks: [drawbacks-and-risks.md](../research/drawbacks-and-risks.md). Current state: [project-state.md](../project-state.md).
