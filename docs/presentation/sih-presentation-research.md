@@ -69,4 +69,4 @@ Full list: [judge-questions.md](judge-questions.md).
 3. Never put a performance number in the idea PDF; write the experiment that
    will measure it.
 4. Show the data category on every future chart (CLAUDE §27).
-5. Ask organisers the GAP-01/03/05/10 questions early (sih@aicte-india.org).
+5. ~~Ask organisers the GAP questions~~ — team decided 2026-09-26 not to contact organisers (ADR-003 amendment); state our definitions openly instead.

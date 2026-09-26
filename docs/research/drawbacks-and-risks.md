@@ -69,7 +69,7 @@ Status values: **Open** · **Proposal pending confirmation** · **Decided (ADR-x
 | Disadvantages | Circularity; no real performance claim |
 | Experiment required | R-01, R-02 |
 | Decision required | — |
-| Current status | **Decided (ADR-003)** 2026-09-26 — accepted limitation; organisers to be asked for sample data |
+| Current status | **Decided (ADR-003)** 2026-09-26 — accepted limitation; organisers not contacted (ADR-003 amendment) |
 
 ### GAP-05 Failure-label definition unknown
 
@@ -159,7 +159,7 @@ Status values: **Open** · **Proposal pending confirmation** · **Decided (ADR-x
 | Disadvantages | — |
 | Experiment required | None |
 | Decision required | No |
-| Current status | Open — ask organisers |
+| Current status | Accepted risk — organisers not contacted (ADR-003 amendment) |
 
 ---
 

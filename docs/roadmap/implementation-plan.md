@@ -11,10 +11,10 @@ experiment → record → document.
 | ID | Blocker | Action | Owner |
 |---|---|---|---|
 | B-01 | ~~Official PS 26170 text not in hand~~ | **Closed 2026-09-26** — official text obtained and preserved ([official-ps-26170.md](../research/ps-analysis/official-ps-26170.md)) | — |
-| B-02 | No official dataset | **Verified 2026-09-26: OFFICIAL DATASET NOT FOUND** (Dataset Link empty; evaluators hold hidden ground truth). **Strategy accepted 2026-09-26 — [ADR-003](../decisions/ADR-003-dataset-strategy.md)**; team to ask organisers for sample data | Team |
+| B-02 | No official dataset | **Verified 2026-09-26: OFFICIAL DATASET NOT FOUND** (Dataset Link empty; evaluators hold hidden ground truth). **Strategy accepted 2026-09-26 — [ADR-003](../decisions/ADR-003-dataset-strategy.md)**; organisers not contacted (ADR-003 amendment) | — |
 | B-03 | ~~Module B inputs ambiguous (C-01)~~ | **Closed 2026-09-26** — R0: Value_0h + Value_24h | — |
 | B-04 | Safety slope undefined (GAP-01) | **Closed 2026-09-26** — [ADR-002](../decisions/ADR-002-safety-slope-and-drift-rate.md) accepted (Δ_allow value still unset; swept) | Team |
-| B-07 | Anomaly Detection Score formula not given (GAP-03) | [anomaly-detection-score.md](../research/ps-analysis/anomaly-detection-score.md); ask organisers | Team |
+| B-07 | Anomaly Detection Score formula not given (GAP-03) | [anomaly-detection-score.md](../research/ps-analysis/anomaly-detection-score.md); organisers not contacted (ADR-003 amendment) — accepted | — |
 | B-08 | Drift-rate formula not given (GAP-02) | **Closed 2026-09-26** — ADR-002 | Team |
 | B-05 | Prior-art items unverified | **Partly done 2026-09-26** (S-01…S-17); remaining UV items in literature-review §2 | Team |
 | B-06 | Operating constraint on review rate unknown (GAP-08) | **Closed 2026-09-26** — [ADR-005](../decisions/ADR-005-operating-point.md) recall-first policy; R* to be pre-registered before E6 | Team |

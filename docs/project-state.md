@@ -18,7 +18,7 @@ Short state summary only. Details live in the linked documents.
 | **Implementation status** | P1 in progress on branch `p1-data-foundation`: canonical schema + mapping (FR-01) and data-quality gate (FR-02, units / multi-modality checks pending) with 28 unit tests incl. checkpoint-leakage tests. No model, prediction or decision code. |
 | **Experiment status** | E0–E6, R-01–R-04 planned; **none executed**. All metrics: TBD — experiment not yet executed. |
 | **Presentation status** | Idea round (**due 30 Sep 2026**): draft built — [idea-submission-content.md](presentation/idea-submission-content.md) + filled official template [sih2026-idea-agnidrishti.pptx](presentation/sih2026-idea-agnidrishti.pptx). Team must fill Team ID / name, review, export PDF, upload. Finale deck: plan only. |
-| **Next action** | Review/merge `p1-data-foundation`; team: idea deck, organiser email, name held-out-family owner. Then E0 config + next P1 step. |
-| **Waiting for user** | Review of branch `p1-data-foundation` (not pushed); idea deck; organiser email; held-out owner name. |
+| **Next action** | Review/merge `p1-data-foundation`; team: idea deck, name held-out-family owner. Then E0 config + next P1 step. |
+| **Waiting for user** | Review of branch `p1-data-foundation` (not pushed); idea deck; held-out owner name; choice of next work track. |
 | **Team docs** | [problem](team-understanding/problem-in-simple-language.md) · [how it works](team-understanding/how-agnidrishti-works.md) · [data & labels](team-understanding/data-and-labels.md) · [decision flow](team-understanding/decision-flow.md) · [known / unknown](team-understanding/what-we-know-and-dont-know.md) |
 | **Risk register** | [drawbacks-and-risks.md](research/drawbacks-and-risks.md) |

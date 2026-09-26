@@ -37,6 +37,14 @@ Rules:
    safety-slope, drift-rate and Anomaly Detection Score definitions; replies are
    recorded in the relevant docs and may supersede ADR-002.
 
+## Amendment — 2026-09-26 (user decision)
+
+Rule 4 is withdrawn: the team will **not** contact the organisers and proceeds
+with the data it has (synthetic + NASA). Consequence: the safety-slope,
+drift-rate, anomaly-score and "defective part" definitions stay our own
+documented choices (ADR-002, ADR-004); a mismatch with the hidden evaluation
+remains a known, accepted risk (GAP-01/02/03/05/10).
+
 ## Consequences
 
 - Results demonstrate behaviour under stated assumptions, not real-world performance.
