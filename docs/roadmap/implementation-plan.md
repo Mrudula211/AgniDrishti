@@ -2,7 +2,7 @@
 
 Status: Draft · Last updated: 2026-09-26
 
-Nothing below may start until the team ends the research phase (CLAUDE.md §0).
+**P1 authorised 2026-09-26** (narrow scope — CLAUDE.md §0). Research phase P0 closed.
 Each step is one small, reviewable change: requirement → minimal code → test →
 experiment → record → document.
 

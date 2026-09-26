@@ -2,7 +2,8 @@
 
 **SIH 2026 — Problem Statement 26170: AI-Driven Anomaly Detection in Component Burn-In & Screening**
 
-> **Status: research and architecture phase. No part of the system is implemented.**
+> **Status: P1 — data foundation (started 2026-09-26).** Only the canonical schema and data-quality
+> checks are being implemented; no model, prediction or decision logic exists.
 > No synthetic dataset has been generated and no official PS dataset exists. Two **external** NASA datasets
 > (MOSFET, IGBT) have been downloaded for methodology research only. No experiment has been run.
 > All metrics in this repository read "TBD — experiment not yet executed."
@@ -58,8 +59,8 @@ docs/
   glossary.md             Terminology rules
 data/                     raw / external / synthetic / interim / processed (empty)
 notebooks/                Exploration (empty)
-src/                      Future package src/agnidrish/ (not created yet)
-tests/                    unit / integration / fixtures (empty)
+src/                      Package src/agnidrish/ (P1: schema + data-quality gate)
+tests/                    unit tests for the package
 configs/                  Configuration (empty)
 scripts/                  Command-line workflows (empty)
 artifacts/                models / metrics / plots / predictions (git-ignored)
@@ -83,7 +84,7 @@ app/                      Demo application (phase P7)
 
 ## Development phases
 
-P0 research (current) → P1 data foundation → P2 baseline → P3 lot + trajectory
+P0 research (done) → **P1 data foundation (current)** → P2 baseline → P3 lot + trajectory
 → P4 168h prediction → P5 uncertainty + decision → P6 explainability → P7 demo
 → P8 presentation. Details: [docs/roadmap/implementation-plan.md](docs/roadmap/implementation-plan.md).
 

@@ -22,24 +22,31 @@ potential future degradation.
 
 # 0. Current Phase (read first)
 
-**Phase: RESEARCH + ARCHITECTURE + DOCUMENTATION (P0).**
+**Phase: P1 — DATA FOUNDATION** (authorised by the team 2026-09-26; P0 decisions
+recorded in ADR-001 Rev. 1 and ADR-002 … ADR-005).
 
-During this phase:
+Scope of P1 (narrow, in this order):
 
-- The project is research-first.
-- Do NOT write implementation code (no models, no data generators, no
-  preprocessing code, no app, no API, no dashboard, no training pipeline).
-- Do NOT create Python modules, `__init__.py` files, empty classes, stubs or
-  placeholder interfaces.
-- Work products are documents under `docs/` and repository scaffolding only.
-- No implementation may begin without a documented requirement in
-  `docs/requirements/requirements-specification.md` and a planned experiment in
-  `docs/research/experiments/experiment-plan.md`.
+- `pyproject.toml` with minimal, justified dependencies.
+- Canonical schema + raw→canonical column mapping (FR-01).
+- Data-quality gate (FR-02) with unit tests, including checkpoint-availability
+  (leakage) tests.
+
+Still NOT allowed in P1 until their gates are met:
+
+- Synthetic data generator — until held-out families 19–20 are sealed and the
+  sweep grids are written (`synthetic-data-design.md` §6–§7).
+- Experiments E1–E6 — until success-criterion bounds and the target recall R*
+  (ADR-005) are pre-registered.
+- Models, prediction, decision engine, app, API, dashboard, notebooks.
+
+No implementation may begin without a documented requirement in
+`docs/requirements/requirements-specification.md` and a planned experiment in
+`docs/research/experiments/experiment-plan.md`.
 
 The phase changes only when the team explicitly says so. When it changes,
-update this section and `README.md` in the same change.
-
-Implementation will start with the step in `docs/roadmap/implementation-plan.md`.
+update this section, `README.md`, `docs/project-state.md` and
+`docs/roadmap/implementation-plan.md` in the same change.
 
 ---
 
@@ -690,8 +697,8 @@ Do not leave obsolete files merely because they were previously generated.
 
 # 29. Development Priority
 
-P0 Research and requirements  ← current
-P1 Dataset strategy and data validation
+P0 Research and requirements  (done 2026-09-26)
+P1 Dataset strategy and data validation  ← current
 P2 Baselines
 P3 Lot-relative and trajectory analysis
 P4 168h prediction
