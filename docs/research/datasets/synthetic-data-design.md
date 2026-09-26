@@ -1,6 +1,6 @@
-# Synthetic Data Design (for review — nothing generated)
+# Synthetic Data Design
 
-Status: Accepted (design approved by user 2026-09-26, Decision 5) — generator implementation still requires P1 authorisation (CLAUDE §0) · Last updated: 2026-09-26
+Status: Accepted (design approved by user 2026-09-26, Decision 5; held-out families sealed and sweep grids pre-registered 2026-09-26) · Last updated: 2026-09-26
 
 Supersedes dataset-strategy.md §3 (moved here). Category: **Synthetic** — never
 "real", "hardware", "ISRO" or "SIH" data.
@@ -73,7 +73,7 @@ held out: never used while designing or tuning any detector; used only in R-01.
 
 | # | Question | Options |
 |---|---|---|
-| Q1 | Who defines held-out families 19–20? | **Decided:** a teammate who does not write or tune detectors (and not Claude). Owner: **TBD — team to name** |
+| Q1 | Who defines held-out families 19–20? | **Decided and done:** written outside the repository by the team, not by Claude; only the SHA-256 commitment is in the repo (§7) |
 | Q2 | Level distributions | Log-normal for current-like; normal for delay-like (assumptions) |
 | Q3 | Drift allowance Δ used to label | ADR-002 accepted: Δ_allow swept over a pre-registered grid |
 | Q4 | Lot sizes / number of lots | Swept; minimum set by split needs (train/val/cal/test lots) |
@@ -83,8 +83,8 @@ held out: never used while designing or tuning any detector; used only in R-01.
 
 - [x] Design approved — by the user, 2026-09-26 (Decision 5)
 - [x] Families 1–18 have a written mechanism and stated assumptions (§3); detailed distributions are written into the generator config in P1
-- [ ] Held-out families 19–20 written and sealed (procedure §7) — owner TBD
-- [ ] Sweep grids fixed before any detector result is seen (to be written into the config at the start of P1)
+- [x] Held-out families 19–20 written and sealed outside the repository (§7) — 2026-09-26
+- [x] Sweep grids fixed before any generator or detector code exists (§8) — 2026-09-26
 - [x] Label rules fixed and linked to ADR-002 (`label_spec_168h`, `label_safety_slope`)
 
 ## 7. Sealing procedure for held-out families 19–20
@@ -99,4 +99,36 @@ held out: never used while designing or tuning any detector; used only in R-01.
 
 | Owner | Date sealed | SHA-256 | Opened for R-01 |
 |---|---|---|---|
-| TBD | — | — | — |
+| Team (kept outside the repository; not Claude) | 2026-09-26 | `1a7de27638222f0dad35c492080577e6abedfc23b2466f66227ee6cff6482f74` | No |
+
+Integrity rules for everyone working in this repository (including Claude): do not
+access, search for, infer or recreate the held-out specification; do not create
+families 19 or 20; development family names never use the numbers 19 or 20.
+
+## 8. Pre-registered sweep grids (fixed 2026-09-26, before any generator code)
+
+These grids are fixed **before** the generator exists and before any detector
+result is seen. They may be extended later only with a dated note; values are
+never removed after results are known.
+
+### 8.1 Drift allowance Δ_allow (ADR-002 sensitivity; used to compute `label_safety_slope`)
+
+| Kind | Grid | Basis |
+|---|---|---|
+| Relative (fraction of \|V₀\|) | 0.02, 0.05, 0.10, 0.15, 0.20, 0.30 | Brackets the ±15 % relative drift values used in ESCC detail specifications (S-03) |
+| Absolute, current-like parameter (µA, assumed unit) | 0.25, 0.5, 1, 2, 4 | Geometric grid; assumption |
+| Absolute, delay-like parameter (ns, assumed unit) | 0.025, 0.05, 0.1, 0.2, 0.4 | Geometric grid; assumption |
+
+### 8.2 Generator sweeps (robustness experiment R-02; one factor at a time from the base config)
+
+| Factor | Grid (multiplier or value) |
+|---|---|
+| Measurement-noise multiplier | 0.5, 1, 2, 4 |
+| Anomaly-prevalence multiplier (non-contaminated lots) | 0.5, 1, 2 |
+| Contaminated-lot anomaly fraction | 0.10, 0.20, 0.30, 0.40 |
+| Components per lot | 6, 12, 25, 50, 100 |
+| Lot-to-lot offset SD multiplier | 0.5, 1, 2 |
+| Late-drift onset window (h) | 30–60, 60–100, 100–140 |
+| Seeds per setting | base seed, base + 1, base + 2 |
+
+The base configuration is `configs/synthetic/development_v1.yaml`.
