@@ -10,8 +10,10 @@ requires-python = ">=3.11"
 dependencies = [
     # Lot tables: grouping by lot/parameter, missing-value handling (FR-01, FR-02).
     "pandas>=2.0,<3",
-    # Vectorised finite-value checks; already required by pandas.
+    # Vectorised finite-value checks and seeded random generation; already required by pandas.
     "numpy>=1.24,<3",
+    # Experiment configs are YAML (CLAUDE.md §17: configs/<area>/<name>.yaml).
+    "pyyaml>=6,<7",
 ]
 
 [project.optional-dependencies]

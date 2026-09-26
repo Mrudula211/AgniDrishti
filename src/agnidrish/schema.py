@@ -43,8 +43,40 @@ CANONICAL_ORDER: tuple[str, ...] = (
 DATA_CATEGORIES: frozenset[str] = frozenset({"official", "external", "synthetic"})
 
 
+# Ground truth, labels and experiment bookkeeping: evaluation only, never model inputs.
+EVALUATION_ONLY_COLUMNS: frozenset[str] = frozenset(
+    {
+        "split",
+        "lot_scenario",
+        "behaviour_family",
+        "is_anomaly",
+        "severity",
+        "severity_band",
+        "anomaly_amplitude",
+        "level_offset",
+        "noise_sd",
+        "data_fault",
+        "scenario",
+        "label_spec_168h",
+        "label_safety_slope",
+        "label_latent",
+    }
+    | {f"true_{col}" for col in VALUE_COLUMNS.values()}
+)
+
+
 class SchemaError(ValueError):
     """A table cannot be mapped to, or does not satisfy, the canonical schema."""
+
+
+def model_input_columns(columns: list[str] | pd.Index, checkpoint: "Checkpoint") -> list[str]:
+    """Columns that may be used as inputs at ``checkpoint``.
+
+    Excludes evaluation-only columns and every measurement taken after
+    ``checkpoint`` (e.g. value_168h at T24).
+    """
+    later = set(VALUE_COLUMNS.values()) - set(available_value_columns(checkpoint))
+    return [c for c in columns if c not in EVALUATION_ONLY_COLUMNS and c not in later]
 
 
 def available_value_columns(checkpoint: Checkpoint) -> tuple[str, ...]:

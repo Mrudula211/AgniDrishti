@@ -1,0 +1,133 @@
+# AgniDrishti synthetic development dataset — base configuration v1.
+#
+# CATEGORY: SYNTHETIC methodology-validation data. NOT official SIH/ISRO data.
+# Every number below is an ASSUMPTION chosen to exercise the pipeline; none is a
+# measured ISRO, SIH or datasheet value. Units are labels for schema testing.
+# Behaviour families, anomaly labels, severity and splits are OUR experimental
+# definitions, not official labels. Held-out families 19-20 are NOT here.
+# Design: docs/research/datasets/synthetic-data-design.md (§3, §8, §9).
+
+dataset_name: synthetic_development
+version: v1
+seed: 20260926
+checkpoints_h: [0, 24, 96, 168]
+device_family: SYN-DEV-A
+
+# Per-parameter model. *_frac values are fractions of `nominal`.
+parameters:
+  iddq:                         # current-like: rises with degradation, upper limit only
+    unit: uA
+    nominal: 10.0
+    spec_min: null
+    spec_max: 30.0
+    direction: up
+    lot_sd_frac: 0.08           # lot-to-lot offset SD
+    comp_sd_frac: 0.05          # component-to-component SD within a lot
+    comp_drift_sd_frac: 0.01    # SD of component healthy drift at 168 h
+    lot_drift_mean_frac: 0.02   # mean lot-common healthy drift at 168 h
+    lot_drift_sd_frac: 0.005
+    meas_sd_frac: 0.005         # measurement noise SD
+    meas_model: proportional    # noise SD proportional to the true level
+    high_mean_factor: 2.3       # lot mean / nominal in high_mean lots
+    quantisation_step: 2.0      # measurement resolution in quantised lots
+  tpd:                          # delay-like: two-sided limits
+    unit: ns
+    nominal: 5.0
+    spec_min: 3.8
+    spec_max: 7.0
+    direction: up
+    lot_sd_frac: 0.03
+    comp_sd_frac: 0.02
+    comp_drift_sd_frac: 0.004
+    lot_drift_mean_frac: 0.005
+    lot_drift_sd_frac: 0.002
+    meas_sd_frac: 0.002
+    meas_model: additive
+    high_mean_factor: 1.1
+    quantisation_step: 0.5
+
+truncation_sd:
+  lot_offset: 3.0
+  component: 3.5
+  component_drift: 4.0
+
+healthy_shape_tau_h: 36.0       # healthy burn-in drift saturates with this time constant
+
+# Lot scenarios. anomaly_fraction is per parameter: anomalous rows / components.
+lot_scenarios:
+  normal:        {n_lots: 12, size: [80, 150], anomaly_fraction: [0.0, 0.0]}
+  few_anomalies: {n_lots: 16, size: [80, 150], anomaly_fraction: [0.02, 0.06]}
+  contaminated:  {n_lots: 6,  size: [80, 150], anomaly_fraction: [0.15, 0.30]}
+  high_mean:     {n_lots: 6,  size: [80, 150], anomaly_fraction: [0.0, 0.05],
+                  excluded_families: [level_outlier]}
+  lot_drift:     {n_lots: 4,  size: [80, 150], anomaly_fraction: [0.0, 0.05], lot_drift_multiplier: 4.0}
+  bimodal:       {n_lots: 4,  size: [80, 150], anomaly_fraction: [0.0, 0.05], bimodal_separation_sd: 3.0}
+  small:         {n_lots: 4,  size: [6, 12],   anomaly_fraction: [0.0, 0.15]}
+  quantised:     {n_lots: 2,  size: [80, 150], anomaly_fraction: [0.0, 0.05]}
+
+# Relative weights for choosing a family (families: synthetic/families.py).
+healthy_family_weights:
+  healthy_stable: 3
+  healthy_random_drift: 3
+  healthy_decelerating: 3
+  healthy_component_offset: 1
+  healthy_noisy: 1
+anomalous_family_weights:
+  degradation_linear: 2
+  degradation_accelerating: 2
+  degradation_decelerating: 2
+  degradation_noisy: 1
+  drift_early: 1
+  drift_late: 1
+  degradation_sigmoid: 1
+  degradation_saturating: 1
+  shift_sudden: 1
+  degradation_wrong_direction: 1
+  level_outlier: 2
+  approaching_spec: 1
+  crossing_spec: 1
+  spec_violation_at_0h: 0.5
+
+# Family shape parameters (uniform ranges).
+family_params:
+  healthy_stable_drift_scale: 0.3
+  healthy_component_offset_sd: [1.5, 2.5]
+  noisy_meas_multiplier: 4.0
+  accelerating_power: [1.3, 1.8]
+  decelerating_power: [0.35, 0.7]
+  early_tau_h: [6.0, 15.0]
+  late_onset_h: [30.0, 120.0]
+  sigmoid_center_h: [40.0, 130.0]
+  sigmoid_width_h: [8.0, 25.0]
+  saturating_tau_h: [30.0, 80.0]
+  sudden_shift_time_h: [100.0, 160.0]
+  level_outlier_sd: [4.0, 20.0]
+  approaching_fraction: [0.85, 0.97]
+  crossing_fraction: [1.05, 1.5]
+  at_0h_excess_sd: [1.0, 5.0]
+
+# Severity k = deviation / reference variation (definition: synthetic-data-design.md §9.4).
+severity:
+  drift_k: [3.0, 40.0]
+  band_edges: {mild: 3.0, moderate: 6.0, severe: 15.0}
+  band_weights: {mild: 0.4, moderate: 0.4, severe: 0.2}
+
+faults:
+  missing_value_rate: 0.005     # fraction of rows with one checkpoint value removed
+  glitch_rate: 0.005            # fraction of healthy rows with a 24 h spike
+  glitch_size_sd: 8.0           # spike size in component-to-component SDs
+
+splits:
+  fractions: {train: 0.50, validation: 0.20, calibration: 0.15, test: 0.15}
+
+audit:
+  near_spec_band: 0.25          # "near a limit": within this fraction of |limit - nominal|
+  value_tolerance_sd: 6.0       # |measured - true| bound for fault-free rows, in noise SDs
+
+# Copy of the pre-registered Δ_allow grid (synthetic-data-design.md §8.1); the audit
+# reports label_safety_slope prevalence across it. Not used by the generator.
+allowance_grid:
+  relative: [0.02, 0.05, 0.10, 0.15, 0.20, 0.30]
+  absolute:
+    iddq: [0.25, 0.5, 1, 2, 4]
+    tpd: [0.025, 0.05, 0.1, 0.2, 0.4]
