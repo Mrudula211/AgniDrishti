@@ -95,8 +95,14 @@ P0 research (done) → **P1 data foundation (current)** → P2 baseline → P3 l
 3. Small change → tests → recorded experiment → docs update.
 4. Fill in the PR checklist (no fabricated numbers, data category stated, leakage considered).
 
-Python environment and dependencies will be defined in `pyproject.toml` at the
-start of P1.
+## Development setup
+
+Python 3.11+. Dependencies and their reasons are in `pyproject.toml`.
+
+```
+pip install -e ".[dev]"
+python -m pytest
+```
 
 ## Important limitations
 
