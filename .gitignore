@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Data: keep structure and READMEs, never the data itself
+data/**/*
+!data/**/
+!data/**/.gitkeep
+!data/README.md
+
+# Generated artifacts
+artifacts/**/*
+!artifacts/**/
+!artifacts/**/.gitkeep
+
+# OS / editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+
+# Secrets
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+secrets.*
+secrets/
+credentials.*
+credentials/
+*.secret
+*.secret.*
+*.token
+*.token.*
+*.password
+*.password.*
+*.credentials
+*.credentials.*
+**/.env
+**/.env.*
+!.env.example
+
+# Local implementation notes and drafts
+implementation/
+docs/implementation/
+**/*-implementation-notes.md
+**/*-implementation-draft.md
