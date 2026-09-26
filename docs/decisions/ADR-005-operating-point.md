@@ -20,7 +20,7 @@ review rate is known (GAP-08).
 
 1. **Pre-registration.** Before E6 is run, the team records in this ADR a target
    recall R* on the primary label (`label_safety_slope`, ADR-004), counting REVIEW as
-   flagged. R* is a design choice, not a result. **R*: not yet set.**
+   flagged. R* is a design choice, not a result. **R* = 0.95** (pre-registered 2026-09-26 before any detector existed; primary label at the headline Δ_allow = 0.15 relative; `configs/experiments/pipeline_v1.yaml`).
 2. **Selection.** Thresholds are chosen on **validation lots only** as the setting with
    the lowest review rate that reaches R*; ties broken by lower false-rejection rate.
    If no setting reaches R*, report that and the highest recall achieved — the target is

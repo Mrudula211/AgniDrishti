@@ -7,6 +7,25 @@ No experiment has been executed. Every result field reads
 result is seen and must not be edited afterwards (add a dated note instead).
 
 Common protocol: [evaluation-protocol.md](evaluation-protocol.md).
+
+## Pre-registration (2026-09-26 — fixed before any detector, predictor or decision code)
+
+Config: `configs/experiments/pipeline_v1.yaml` (authoritative values). Summary:
+
+| Item | Value | Basis |
+|---|---|---|
+| Data | Synthetic development v1 (DS-04, SHA-256 `7a170d89…1cde0`) | ADR-003 |
+| Development evaluation | validation lots; models fit on train lots, conformal on calibration lots | evaluation-protocol §2 |
+| Final evaluation | test lots, once, after the pipeline is frozen | CLAUDE §7 |
+| Decision checkpoint | T24 (Value_0h + Value_24h) | R0 Module B |
+| Primary label | `label_safety_slope`, Δ_allow = 0.15 relative | ADR-002, ADR-004 |
+| Quality gate | min lot size 20; scale floor 0.1 % of nominal | S-01 (IQR/1.35 inexact below 20) |
+| Lot-relative scale / reject threshold | IQR/1.35; \|z\| ≥ 6 | AEC-Q001 Rev-D Dynamic PAT (S-01) |
+| REVIEW z threshold | chosen on validation from {2, 2.5, 3, 3.5, 4, 5, 6} | ADR-005 |
+| Predictors | persistence, linear extrapolation, population increment, linear regression; pick lowest validation MAE | R0 (MAE official) |
+| Interval | split conformal, α = 0.10 | S-10 |
+| R* | 0.95, REVIEW counted as flagged | ADR-005 |
+| Success criteria | per experiment below and in the config | — |
 Ablation view: [ablation-plan.md](ablation-plan.md).
 
 Each experiment is run separately per data category (official / external /
@@ -45,7 +64,7 @@ synthetic) and results are never pooled across categories.
 | Variants | MAD-based vs IQR-based robust scale; classical z (to show robustness effect); E2b Isolation Forest comparator (conditional) |
 | Sensitivity | Lot size, contamination fraction, lot offset size, bimodal lots, measurement resolution |
 | Metrics | As E1 + PR-AUC (score-based) + per-lot FPR spread |
-| Success criterion | Recall improves over E1 on held-out lots with FPR increase judged acceptable by the team (bound to be set before running) |
+| Success criterion | Recall on the primary label above E1 with FPR increase ≤ 0.05 (pre-registered) |
 | Result | TBD — experiment not yet executed |
 
 ## E3 — Static + lot + trajectory
@@ -56,7 +75,7 @@ synthetic) and results are never pooled across categories.
 | Layers | L0–L2 (level + drift) |
 | Checkpoints | T24 (single increment) and T96 (+ slope change) separately |
 | Metrics | As E2, reported per scenario |
-| Success criterion | Recall gain on drift scenarios without loss on others beyond noise (bounded before running) |
+| Success criterion | Recall on drift families above E2 with FPR increase ≤ 0.05 over E2 (pre-registered) |
 | Result | TBD — experiment not yet executed |
 
 ## E4 — + 168h prediction
@@ -69,7 +88,7 @@ synthetic) and results are never pooled across categories.
 | Models | B0 persistence, B1 linear extrapolation, B2 lot-median increment, B3 linear regression; E4b (conditional) GBM / hierarchical model |
 | Metrics | MAE, RMSE, tail error (top-decile true v168), safety-slope confusion matrix, detection metrics as E3, hours of burn-in potentially saved (reported with assumption A-11) |
 | Leakage checks | Feature availability matrix enforced; lot-grouped splits |
-| Success criterion | (a) chosen model beats B0 on held-out lots including the tail; (b) recall gain over E3 |
+| Success criterion | (a) chosen model MAE below B0 on validation and tail MAE not worse than B0; (b) recall gain over E3 (pre-registered) |
 | Result | TBD — experiment not yet executed |
 
 ## E5 — + uncertainty
@@ -80,7 +99,7 @@ synthetic) and results are never pooled across categories.
 | Layers | L0–L5 |
 | Methods | U1 split conformal (lot-level calibration); U2/U3 conditional |
 | Metrics | Coverage (overall, per lot, per scenario), interval width, then detection + operational metrics |
-| Success criterion | Coverage within a tolerance of target (tolerance set before running); escape-rate reduction vs E4 |
+| Success criterion | Coverage within 0.05 of the 0.90 target overall on validation (pre-registered); escape-rate reduction vs E4 |
 | Result | TBD — experiment not yet executed |
 
 ## E6 — Full decision rules
@@ -90,7 +109,7 @@ synthetic) and results are never pooled across categories.
 | Hypothesis | The full rule set gives the best escape-rate / review-rate trade-off of all variants |
 | Layers | L0–L2, L4–L6 (+ L7 explanations generated) |
 | Metrics | Defect escape rate, false rejection rate, review rate, auto-cleared %, recall–review-rate curve, latency per lot |
-| Success criterion | Dominates or matches E5 on the curve; otherwise simplify |
+| Success criterion | Reaches R* = 0.95 on validation at a lower review rate than E5's interval rules alone; otherwise simplify (pre-registered) |
 | Result | TBD — experiment not yet executed |
 
 ## Robustness experiments (after E6)

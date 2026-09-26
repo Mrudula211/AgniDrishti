@@ -22,8 +22,17 @@ potential future degradation.
 
 # 0. Current Phase (read first)
 
-**Phase: P1 — DATA FOUNDATION** (authorised by the team 2026-09-26; P0 decisions
-recorded in ADR-001 Rev. 1 and ADR-002 … ADR-005).
+**Phase: P2–P7 — BASELINES → PROTOTYPE** (authorised by the team 2026-09-26:
+"do everything as per you", end product in 2 days). P1 data foundation is done.
+Experiment values are pre-registered in `configs/experiments/pipeline_v1.yaml`.
+
+Build one layer per change, in this order, each with tests and its recorded
+experiment on validation lots: L1 + metrics (E1) → L2 lot-relative level/drift
+(E2, E3) → L4 168h prediction + safety-slope rule (E4) → L5 interval (E5) → L6
+decision rules (E6) → L7 explanations → one final test-lot evaluation →
+prototype CLI + demo built only from recorded outputs.
+
+Earlier P1 scope (kept for record):
 
 Scope of P1 (narrow, in this order):
 
@@ -37,9 +46,10 @@ Still NOT allowed in P1 until their gates are met:
 - ~~Synthetic data generator~~ — gate met 2026-09-26 (families sealed, grids
   pre-registered); development generator + E0 audit implemented (FR-17–FR-19).
   Never create or reconstruct held-out families 19–20.
-- Experiments E1–E6 — until success-criterion bounds and the target recall R*
-  (ADR-005) are pre-registered.
-- Models, prediction, decision engine, app, API, dashboard, notebooks.
+- ~~Experiments E1–E6~~ — gate met 2026-09-26 (pre-registration above).
+- Still not allowed: advanced / black-box models (CLAUDE §4), a web server or
+  database, notebooks with production logic, any number in the demo that does
+  not come from a recorded run.
 
 No implementation may begin without a documented requirement in
 `docs/requirements/requirements-specification.md` and a planned experiment in
@@ -699,8 +709,8 @@ Do not leave obsolete files merely because they were previously generated.
 # 29. Development Priority
 
 P0 Research and requirements  (done 2026-09-26)
-P1 Dataset strategy and data validation  ← current
-P2 Baselines
+P1 Dataset strategy and data validation  (done 2026-09-26)
+P2 Baselines  ← current (P2–P7 authorised together, one layer per change)
 P3 Lot-relative and trajectory analysis
 P4 168h prediction
 P5 Uncertainty and risk engine

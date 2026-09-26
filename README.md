@@ -2,7 +2,7 @@
 
 **SIH 2026 — Problem Statement 26170: AI-Driven Anomaly Detection in Component Burn-In & Screening**
 
-> **Status: P1 — data foundation (started 2026-09-26).** Implemented: canonical schema, data-quality gate,
+> **Status: P2–P7 — baselines to prototype (authorised 2026-09-26); P1 done.** Implemented: canonical schema, data-quality gate,
 > synthetic data generator (development families only) and E0 audit. No model, prediction or decision logic exists.
 > A **synthetic** development dataset exists (methodology validation only); no official PS dataset exists. Two **external** NASA datasets
 > (MOSFET, IGBT) have been downloaded for methodology research only. No experiment has been run.

@@ -2,7 +2,7 @@
 
 Status: Draft · Last updated: 2026-09-26
 
-**P1 authorised 2026-09-26** (narrow scope — CLAUDE.md §0). Research phase P0 closed.
+**P1 done; P2–P7 authorised 2026-09-26** (CLAUDE.md §0; values pre-registered in `configs/experiments/pipeline_v1.yaml`).
 Each step is one small, reviewable change: requirement → minimal code → test →
 experiment → record → document.
 
