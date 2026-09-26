@@ -237,6 +237,9 @@ def _check_synthetic(table: pd.DataFrame, config: GeneratorConfig, violations: l
         dataset_version=config.dataset_version,
         seed=config.seed,
         lot_scenarios=lots["scenario"].value_counts().sort_index().to_dict(),
+        lots_by_scenario_and_split=(
+            table.groupby(["lot_scenario", "split"])["lot_id"].nunique().unstack(fill_value=0).to_dict(orient="index")
+        ),
         families=table["behaviour_family"].value_counts().sort_index().to_dict(),
         anomalous_rows=int(table["is_anomaly"].sum()),
         normal_rows=int(healthy.sum()),

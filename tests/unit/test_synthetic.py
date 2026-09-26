@@ -71,7 +71,13 @@ def test_splits_are_whole_lots_stratified_by_scenario():
     assert first == assign_splits(lots, fractions, np.random.default_rng(1))
     assert set(first) == set(lots.index) and set(first.values()) <= set(SPLITS)
     in_a = [first[lot] for lot in lots.index[lots == "a"]]
-    assert {s: in_a.count(s) for s in SPLITS} == {"train": 5, "validation": 2, "calibration": 2, "test": 1}
+    assert {s: in_a.count(s) for s in SPLITS} == {"train": 5, "validation": 2, "calibration": 1, "test": 2}
+
+
+def test_small_scenarios_still_reach_the_test_split():
+    lots = pd.Series(["rare"] * 4, index=["L1", "L2", "L3", "L4"])
+    fractions = {"train": 0.5, "validation": 0.2, "calibration": 0.15, "test": 0.15}
+    assert "test" in assign_splits(lots, fractions, np.random.default_rng(0)).values()
 
 
 def test_drift_severity_is_amplitude_over_reference_variation(config, data):

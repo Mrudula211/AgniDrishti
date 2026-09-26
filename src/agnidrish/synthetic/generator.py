@@ -17,7 +17,10 @@ from agnidrish.schema import VALUE_COLUMNS
 from agnidrish.synthetic.config import SPLITS, GeneratorConfig, ParameterSpec
 from agnidrish.synthetic.families import RowContext, Shape, sample_behaviour, severity_band
 
-GENERATOR_VERSION = "1.0.0"
+GENERATOR_VERSION = "1.1.0"
+# Rounding ties give lots to the frozen test split first, so hard scenarios with
+# few lots are still represented in final evaluation.
+TIE_PRIORITY: tuple[str, ...] = ("test", "validation", "calibration", "train")
 
 
 def truncated_normal(rng: np.random.Generator, sd: float, bound_sd: float, size: int | None = None) -> Any:
@@ -66,7 +69,7 @@ def assign_splits(
         n = len(lot_ids)
         exact = {s: fractions[s] * n for s in SPLITS}
         counts = {s: int(np.floor(v)) for s, v in exact.items()}
-        by_remainder = sorted(SPLITS, key=lambda s: (-(exact[s] - counts[s]), SPLITS.index(s)))
+        by_remainder = sorted(SPLITS, key=lambda s: (-(exact[s] - counts[s]), TIE_PRIORITY.index(s)))
         for s in by_remainder[: n - sum(counts.values())]:
             counts[s] += 1
         shuffled = [lot_ids[i] for i in rng.permutation(n)]
