@@ -51,6 +51,30 @@ Every derived file records: source file hash, config, commit, data category.
 Rule: blocking component flag → decision REVIEW with reason; blocking lot flag
 → all components in the lot REVIEW + lot-level alert.
 
+### Implementation status (P1, 2026-09-26) — `src/agnidrish/quality.py`
+
+All implemented flags are blocking. Lot checks run per (lot, parameter) on valid
+rows only, and only on the columns available at the checkpoint.
+
+| Check | Flag | Status |
+|---|---|---|
+| Required columns present | `SchemaError` | Implemented |
+| Missing identifier (component / lot / parameter) | `MISSING_IDENTIFIER` | Implemented |
+| Duplicate `component_id` within lot + parameter | `DUPLICATE_COMPONENT` | Implemented |
+| Missing checkpoint value | `MISSING_VALUE` | Implemented |
+| Non-numeric / non-finite value or limit | `NON_NUMERIC`, `NON_FINITE` | Implemented |
+| Non-physical value (per-parameter bounds, optional) | `OUT_OF_PHYSICAL_RANGE` | Implemented |
+| No spec limit on either side; spec_min > spec_max | `NO_SPEC_LIMIT`, `INVALID_SPEC_LIMITS` | Implemented |
+| Lot smaller than `min_lot_size` (valid rows) | `LOT_TOO_SMALL` | Implemented |
+| Lot MAD of a level ≤ per-parameter floor | `LOW_LEVEL_DISPERSION` | Implemented |
+| Lot MAD of a between-checkpoint difference ≤ floor | `LOW_DRIFT_DISPERSION` | Implemented |
+| Units consistent within a parameter | — | **Not implemented** — needs a unit convention decision |
+| Suspected multi-modal lot | — | **Not implemented** — rule and threshold need design + E2 bimodal-lot evidence |
+| Single-point glitch | — | **Not implemented** — T96 extension only |
+
+Thresholds (`min_lot_size`, per-parameter `scale_floor`, `physical_bounds`) have no
+defaults in code; they will live in `configs/data/` when the first script (E0) uses them.
+
 ## 4. L1 — Absolute Specification Check
 
 | Item | Content |

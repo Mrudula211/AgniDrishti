@@ -15,8 +15,8 @@ Priority: **M** must (PS-mandated or needed for any valid result) · **S** shoul
 
 | ID | Requirement | Origin | Pri. | Verified by |
 |---|---|---|---|---|
-| FR-01 | Ingest a lot measurement table and map raw column names to the canonical schema ([data-dictionary](../research/datasets/data-dictionary.md)). Reject files that cannot be mapped. | EI | M | Unit + integration test |
-| FR-02 | **Data quality gate**: check schema, units, duplicates, missing checkpoints, non-physical values, lot size below minimum, zero/near-zero lot dispersion (MAD = 0), suspected multi-modal lots. Each issue produces a named flag. Components with blocking issues go to REVIEW, never PASS. | EI (PSR-05) | M | Unit tests per check |
+| FR-01 | Ingest a lot measurement table and map raw column names to the canonical schema ([data-dictionary](../research/datasets/data-dictionary.md)). Reject files that cannot be mapped. | EI | M | Unit + integration test — **unit tests implemented (P1)**: `src/agnidrish/schema.py`, `tests/unit/test_schema.py` |
+| FR-02 | **Data quality gate**: check schema, units, duplicates, missing checkpoints, non-physical values, lot size below minimum, zero/near-zero lot dispersion (MAD = 0), suspected multi-modal lots. Each issue produces a named flag. Components with blocking issues go to REVIEW, never PASS. | EI (PSR-05) | M | Unit tests per check — **partly implemented (P1)**: `src/agnidrish/quality.py`; units and multi-modality checks pending ([data-pipeline.md](../architecture/data-pipeline.md) §3) |
 | FR-03 | **Absolute specification check** at each available checkpoint (supports lower, upper or two-sided limits). | PSR-07 | M | Unit test; E1 |
 | FR-04 | **Lot-relative level score**: robust z-score of the value versus its lot at the same checkpoint. | PSR-02 | M | Unit test; E2 |
 | FR-05 | **Lot-relative drift score**: robust z-score of the component's drift versus the drift of its lot over the same interval. | PSR-02, EI | M | Unit test; E3 |
