@@ -2,7 +2,7 @@
 
 Status: Draft · Last updated: 2026-09-26
 
-The demo walks one component through every layer. It is **not built** (P7).
+The demo walks one component through every layer. **Built 2026-09-26:** `scripts/build_demo.py` over the recorded final test run; featured rows follow the rule below plus a contrast row and one missed defect.
 All values shown in the demo must come from a recorded pipeline run. The
 screen must show the data category at all times.
 

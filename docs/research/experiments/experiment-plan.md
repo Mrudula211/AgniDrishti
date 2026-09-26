@@ -53,7 +53,7 @@ synthetic) and results are never pooled across categories.
 | Checkpoints | T24, T96, T168 |
 | Metrics | Recall, precision, F1, FNR, FPR, review/reject rate; per scenario (synthetic) |
 | Success criterion | Not a pass/fail experiment — establishes the baseline |
-| Result | TBD — experiment not yet executed |
+| Result | Recorded (synthetic v1, test): recall 0.133, FPR 0.012 on the primary label (30 positives). Baseline only. Runs: `artifacts/metrics/E1-E6_validation/20260926-144425_c8ca99b` (validation), `artifacts/metrics/E1-E6_test/20260926-144448_c8ca99b` (test). |
 
 ## E2 — Static + lot statistics
 
@@ -65,7 +65,7 @@ synthetic) and results are never pooled across categories.
 | Sensitivity | Lot size, contamination fraction, lot offset size, bimodal lots, measurement resolution |
 | Metrics | As E1 + PR-AUC (score-based) + per-lot FPR spread |
 | Success criterion | Recall on the primary label above E1 with FPR increase ≤ 0.05 (pre-registered) |
-| Result | TBD — experiment not yet executed |
+| Result | Recorded: criterion **not met** (recall unchanged 0.133; scenario-truth recall 0.055 → 0.127). See ablation-plan §5 F2. Runs: `artifacts/metrics/E1-E6_validation/20260926-144425_c8ca99b` (validation), `artifacts/metrics/E1-E6_test/20260926-144448_c8ca99b` (test). |
 
 ## E3 — Static + lot + trajectory
 
@@ -76,7 +76,7 @@ synthetic) and results are never pooled across categories.
 | Checkpoints | T24 (single increment) and T96 (+ slope change) separately |
 | Metrics | As E2, reported per scenario |
 | Success criterion | Recall on drift families above E2 with FPR increase ≤ 0.05 over E2 (pre-registered) |
-| Result | TBD — experiment not yet executed |
+| Result | Recorded: criterion met — recall 0.667, FPR 0.032 (test). F1. Runs: `artifacts/metrics/E1-E6_validation/20260926-144425_c8ca99b` (validation), `artifacts/metrics/E1-E6_test/20260926-144448_c8ca99b` (test). |
 
 ## E4 — + 168h prediction
 
@@ -89,7 +89,7 @@ synthetic) and results are never pooled across categories.
 | Metrics | MAE, RMSE, tail error (top-decile true v168), safety-slope confusion matrix, detection metrics as E3, hours of burn-in potentially saved (reported with assumption A-11) |
 | Leakage checks | Feature availability matrix enforced; lot-grouped splits |
 | Success criterion | (a) chosen model MAE below B0 on validation and tail MAE not worse than B0; (b) recall gain over E3 (pre-registered) |
-| Result | TBD — experiment not yet executed |
+| Result | Recorded: (a) met — population increment beats persistence on MAE and tail MAE per parameter; (b) **not met** — no recall gain over E3. F3. Runs: `artifacts/metrics/E1-E6_validation/20260926-144425_c8ca99b` (validation), `artifacts/metrics/E1-E6_test/20260926-144448_c8ca99b` (test). |
 
 ## E5 — + uncertainty
 
@@ -100,7 +100,7 @@ synthetic) and results are never pooled across categories.
 | Methods | U1 split conformal (lot-level calibration); U2/U3 conditional |
 | Metrics | Coverage (overall, per lot, per scenario), interval width, then detection + operational metrics |
 | Success criterion | Coverage within 0.05 of the 0.90 target overall on validation (pre-registered); escape-rate reduction vs E4 |
-| Result | TBD — experiment not yet executed |
+| Result | Recorded: criterion met — coverage 0.886 (validation), 0.887 (test) vs 0.90; per-lot 0.668–0.980. No detection change. F4. Runs: `artifacts/metrics/E1-E6_validation/20260926-144425_c8ca99b` (validation), `artifacts/metrics/E1-E6_test/20260926-144448_c8ca99b` (test). |
 
 ## E6 — Full decision rules
 
@@ -110,7 +110,7 @@ synthetic) and results are never pooled across categories.
 | Layers | L0–L2, L4–L6 (+ L7 explanations generated) |
 | Metrics | Defect escape rate, false rejection rate, review rate, auto-cleared %, recall–review-rate curve, latency per lot |
 | Success criterion | Reaches R* = 0.95 on validation at a lower review rate than E5's interval rules alone; otherwise simplify (pre-registered) |
-| Result | TBD — experiment not yet executed |
+| Result | Recorded: **R* = 0.95 not reached** — recall 0.800 at review rate 0.104 (test; z_review = 2.5 chosen on validation). F5, F6. Runs: `artifacts/metrics/E1-E6_validation/20260926-144425_c8ca99b` (validation), `artifacts/metrics/E1-E6_test/20260926-144448_c8ca99b` (test). |
 
 ## Robustness experiments (after E6)
 

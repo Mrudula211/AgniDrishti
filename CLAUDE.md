@@ -22,7 +22,9 @@ potential future degradation.
 
 # 0. Current Phase (read first)
 
-**Phase: P2–P7 — BASELINES → PROTOTYPE** (authorised by the team 2026-09-26:
+**Phase: PROTOTYPE BUILT — awaiting team review** (P2–P7 completed 2026-09-26; results in
+`docs/research/experiments/ablation-plan.md` §3–§5; v1 test split spent — changes need a
+new pre-registered config and fresh data). Authorisation record: P2–P7 authorised by the team 2026-09-26 (
 "do everything as per you", end product in 2 days). P1 data foundation is done.
 Experiment values are pre-registered in `configs/experiments/pipeline_v1.yaml`.
 

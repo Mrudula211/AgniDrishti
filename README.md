@@ -2,11 +2,9 @@
 
 **SIH 2026 — Problem Statement 26170: AI-Driven Anomaly Detection in Component Burn-In & Screening**
 
-> **Status: P2–P7 — baselines to prototype (authorised 2026-09-26); P1 done.** Implemented: canonical schema, data-quality gate,
-> synthetic data generator (development families only) and E0 audit. No model, prediction or decision logic exists.
-> A **synthetic** development dataset exists (methodology validation only); no official PS dataset exists. Two **external** NASA datasets
-> (MOSFET, IGBT) have been downloaded for methodology research only. No experiment has been run.
-> All metrics in this repository read "TBD — experiment not yet executed."
+> **Status: working prototype (P2–P7 built 2026-09-26) — evaluated on SYNTHETIC data only.** Implemented: canonical schema, data-quality gate,
+> Pipeline: quality gate → datasheet limit → lot-relative level/drift → 168 h prediction → prediction interval →
+> ordered PASS/REVIEW/REJECT rules → evidence card. No official PS dataset exists; nothing here is ISRO hardware data.
 
 ## Problem
 
@@ -103,7 +101,24 @@ Python 3.11+. Dependencies and their reasons are in `pyproject.toml`.
 pip install -e ".[dev]"
 python -m pytest
 python scripts/generate_synthetic.py   # SYNTHETIC development data + E0 audit
+python scripts/run_experiments.py      # E1–E6 on validation lots -> artifacts/metrics/E1-E6_validation/<run>
+python scripts/run_experiments.py --final artifacts/metrics/E1-E6_validation/<run>   # once, test lots
+python scripts/build_demo.py artifacts/metrics/E1-E6_test/<run>                      # demo page
 ```
+
+## Prototype
+
+Screen a lot file at 24 h with a frozen pipeline; writes `decisions.csv` and an HTML
+evidence report under `artifacts/screening/`:
+
+```
+python scripts/screen_lot.py --input lots.csv --category synthetic     --pipeline artifacts/metrics/E1-E6_validation/<run>/frozen_pipeline.json
+```
+
+Input: canonical columns (`component_id, lot_id, parameter, unit, value_0h, value_24h,
+spec_min, spec_max, …`) or a raw file plus `--mapping mapping.yaml`. Later checkpoints are
+dropped before screening. Results so far are on **synthetic** data only:
+[ablation-plan.md](docs/research/experiments/ablation-plan.md) §3–§5.
 
 ## Important limitations
 
