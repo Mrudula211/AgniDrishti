@@ -1,6 +1,6 @@
 # Dataset Strategy
 
-Status: Draft · Last updated: 2026-09-26
+Status: Accepted ([ADR-003](../../decisions/ADR-003-dataset-strategy.md), 2026-09-26) · Last updated: 2026-09-26
 
 ## 0. Verified status (2026-09-26)
 
@@ -69,4 +69,4 @@ Moved (2026-09-26) and expanded in [synthetic-data-design.md](synthetic-data-des
 - Official data availability (U-02).
 - ~~NASA licence terms~~ recorded 2026-09-26 in [external-datasets.md](external-datasets.md).
 - Mapping of NASA time axes to PS checkpoints (assumption to be designed in P1).
-- Team acceptance of this strategy (GAP-04 in [../drawbacks-and-risks.md](../drawbacks-and-risks.md)).
+- ~~Team acceptance of this strategy~~ accepted 2026-09-26 — [ADR-003](../../decisions/ADR-003-dataset-strategy.md).

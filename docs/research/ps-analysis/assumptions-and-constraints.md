@@ -15,7 +15,7 @@ and date; do not delete the row.
 | A-03 | Temporal | ~~The mandatory early prediction uses only 0h + 24h (T24).~~ Withdrawn 2026-09-26: Module B inputs are unresolved (R3: 0h+24h; R2: 0h/24h/96h). Both T24 and T96 paths are kept; neither is assumed to be the PS requirement. | Avoid designing around an unconfirmed input set | Official PS — see discrepancy-log DL-01 | **Resolved 2026-09-26 (R0):** Module B inputs are Value_0h and Value_24h. Any T96 model is an extension outside Module B. |
 | A-04 | Dataset | A lot identifier exists, and lots are measured together at each checkpoint. | Lot-relative scoring | Data inspection | Open |
 | A-05 | Dataset | Each lot has enough components for robust statistics (minimum TBD, set by experiment). | MAD stability | Data inspection + E2 sensitivity | Open |
-| A-06 | Labelling | "Failure" labels are **proxies**: violation of the spec limit at 168h, or of the safety slope. True field failure is unobservable. | Defines metrics | Official PS / data | Open |
+| A-06 | Labelling | "Failure" labels are **proxies**: violation of the spec limit at 168h, or of the safety slope. True field failure is unobservable. | Defines metrics | Official PS / data | Decided as working proxy 2026-09-26 — ADR-004 (primary `label_safety_slope`) |
 | A-07 | Labelling | Most components in a lot are healthy (defects are rare). | Robust statistics assume a majority of normal parts | Data inspection | Open |
 | A-08 | Dataset | Parameters are continuous electrical measurements with known units. | Feature maths | Data inspection | Open |
 | A-09 | Dataset | Initially one parameter per component; multiple parameters handled later. | Scope control | Official PS / data | Open |

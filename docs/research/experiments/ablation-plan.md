@@ -11,15 +11,15 @@ improve the evidence is removed or simplified, not kept for presentation value.
 |---|---|---|---|
 | 1 | Static specification | L0, L1 | E1 |
 | 2 | + lot statistics | + L2 (level) | E2 |
-| 3 | + trajectory | + L2 (drift), L3 | E3 |
+| 3 | + drift (trajectory) | + L2 (drift) | E3 |
 | 4 | + 168h prediction | + L4, rules on point prediction | E4 |
 | 5 | + uncertainty | + L5, interval-based rules | E5 |
-| 6 | Full risk engine | + full L6 rule set | E6 |
+| 6 | Full decision rules | + full L6 rule set | E6 |
 
 ## 2. Leave-one-out ablation (secondary)
 
 From the full system (step 6), remove one layer at a time: −L2 level, −L2 drift,
-−L3, −L4, −L5, −R4 (joint-extreme reject rule). Shows interactions the
+−L4, −L5, −R4 (joint-extreme reject rule). Shows interactions the
 cumulative order can hide.
 
 ## 3. Result table (to be filled from recorded runs only)

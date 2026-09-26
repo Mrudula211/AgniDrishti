@@ -52,7 +52,7 @@ synthetic) and results are never pooled across categories.
 | Field | Content |
 |---|---|
 | Hypothesis | Lot-relative drift features detect "normal-level, abnormal-drift" parts missed by E2 |
-| Layers | L0–L3 |
+| Layers | L0–L2 (level + drift) |
 | Checkpoints | T24 (single increment) and T96 (+ slope change) separately |
 | Metrics | As E2, reported per scenario |
 | Success criterion | Recall gain on drift scenarios without loss on others beyond noise (bounded before running) |
@@ -82,12 +82,12 @@ synthetic) and results are never pooled across categories.
 | Success criterion | Coverage within a tolerance of target (tolerance set before running); escape-rate reduction vs E4 |
 | Result | TBD — experiment not yet executed |
 
-## E6 — Full risk decision framework
+## E6 — Full decision rules
 
 | Field | Content |
 |---|---|
 | Hypothesis | The full rule set gives the best escape-rate / review-rate trade-off of all variants |
-| Layers | L0–L6 (+ L7 explanations generated) |
+| Layers | L0–L2, L4–L6 (+ L7 explanations generated) |
 | Metrics | Defect escape rate, false rejection rate, review rate, auto-cleared %, recall–review-rate curve, latency per lot |
 | Success criterion | Dominates or matches E5 on the curve; otherwise simplify |
 | Result | TBD — experiment not yet executed |

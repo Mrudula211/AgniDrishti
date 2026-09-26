@@ -2,6 +2,8 @@
 
 Status: Proposed · Last updated: 2026-09-26 · Decision: [ADR-001](../decisions/ADR-001-initial-architecture.md)
 
+> Layer set revised 2026-09-26 (ADR-001 Revision 1): L3 merged into L2, no fused risk score, 7 layers.
+>
 > **Provisional.** Nothing here is implemented or validated. Each layer after
 > the absolute specification check stays in the design only if the ablation
 > ([ablation-plan.md](../research/experiments/ablation-plan.md)) shows it adds value.
@@ -18,22 +20,19 @@ Burn-in data (one lot, one checkpoint)
 [L1] Absolute Specification Check ── violation ──────► REJECT candidate
         │
         ▼
-[L2] Lot-Relative Analysis  (robust z of level, robust z of drift)
-        │
-        ▼
-[L3] Trajectory / Drift Features  (checkpoint-specific)
+[L2] Lot-Relative Analysis of level AND drift  (robust z; checkpoint-specific drift features)
         │
         ▼
 [L4] 168h Prediction  (point estimate)
         │
         ▼
-[L5] Uncertainty Estimation  (prediction interval)
+[L5] Uncertainty Estimation  (prediction interval) — conditional on E5
         │
         ▼
-[L6] Risk Fusion  (documented rules)
+[L6] Decision Rules  (ordered, documented; incl. safety-slope rule; no fused score)
         │
         ▼
-     PASS / REVIEW / REJECT
+     PASS / REVIEW / REJECT  + binary flag
         │
         ▼
 [L7] Engineer-Readable Explanation + Audit Record
@@ -45,9 +44,9 @@ The same pipeline runs at each checkpoint with only the data available then.
 
 | Checkpoint | Available values | Layers active | Purpose |
 |---|---|---|---|
-| **T24** | v0, v24 | L0–L7 (L3 limited to one increment) | **Module B** (official: Value_0h + Value_24h → Value_168h) and early reject (OPS-03, OPS-04) |
-| **T96** | v0, v24, v96 | L0–L7 (L3 adds slope change) | Optional extension, **not** Module B; kept only if it adds value and is reported separately |
-| **T168** | all | L0–L2 (+ L3 descriptive) | Final Module A screening; ground truth for L4/L5 evaluation |
+| **T24** | v0, v24 | L0–L2, L4–L7 (L2 drift = one increment) | **Module B** (official: Value_0h + Value_24h → Value_168h) and early reject (OPS-03, OPS-04) |
+| **T96** | v0, v24, v96 | L0–L2, L4–L7 (L2 drift adds slope change) | Optional extension, **not** Module B; kept only if it adds value and is reported separately |
+| **T168** | all | L0–L2 (drift descriptive) | Final Module A screening; ground truth for L4/L5 evaluation |
 
 Module B inputs resolved by the official PS text (R0) — [discrepancy-log](../research/ps-analysis/discrepancy-log.md) DL-01.
 
@@ -57,11 +56,11 @@ Module B inputs resolved by the official PS text (R0) — [discrepancy-log](../r
 |---|---|---|
 | L0 Data quality gate | [data-pipeline.md](data-pipeline.md) | PSR-05 |
 | L1 Absolute spec check | [data-pipeline.md](data-pipeline.md) | PSR-07 |
-| L2 Lot-relative analysis | [ml-pipeline.md](ml-pipeline.md) | PSR-02 |
-| L3 Trajectory features | [ml-pipeline.md](ml-pipeline.md) | PSR-01, PSR-02 |
+| L2 Lot-relative analysis (level + drift) | [ml-pipeline.md](ml-pipeline.md) | PSR-01, PSR-02, OPS-04 |
+| ~~L3~~ | Retired — merged into L2 (ADR-001 Rev. 1) | — |
 | L4 168h prediction | [ml-pipeline.md](ml-pipeline.md) | PSR-03 |
-| L5 Uncertainty | [ml-pipeline.md](ml-pipeline.md) | PSR-04, PSR-05 |
-| L6 Risk fusion + decision | [decision-engine.md](decision-engine.md) | PSR-04, PSR-05 |
+| L5 Uncertainty (conditional) | [ml-pipeline.md](ml-pipeline.md) | PSR-04, PSR-05 |
+| L6 Decision rules | [decision-engine.md](decision-engine.md) | PSR-04, PSR-05 |
 | L7 Explanation + audit | [explainability.md](explainability.md) | PSR-06 |
 
 ## 4. Design principles
@@ -79,7 +78,7 @@ Module B inputs resolved by the official PS text (R0) — [discrepancy-log](../r
 ```
 src/agnidrish/
     data/        L0 schema mapping, validation (P1)
-    features/    L2 lot-relative scores, L3 trajectory features (P3)
+    features/    L2 lot-relative level + drift scores (P3)
     models/      L4 predictors, L5 intervals (P4–P5)
     decision/    L1 spec check, L6 rules (P2, P5)
     evaluation/  metrics, splits, leakage checks (P1–P2)
@@ -117,6 +116,6 @@ layer — no experiment has run.
 | L6 Decision rules | OPS-04/05/07 require a flag + justified classification; three-way not required | Route doubt to humans | S-13/S-14 | — | REVIEW handled by people | Review flood | E6 curves | Three-way part yes | **Keep ordered rules; drop any weighted "risk fusion" score.** Must also emit a binary flag (anomaly-detection-score.md §5) |
 | L7 Explanation | **OPS-07** | QA can verify | R0 | Evidence fields | Templates match logic | Drift between text and logic | Template tests | No (PS) | **Keep** |
 
-Net change proposed: 8 layers → 7 (L2-drift and L3 merged at T24); "risk
-fusion" renamed "decision rules" with no fused score. Needs team confirmation
-before ADR-001 is revised.
+Net change: 8 layers → 7 (L2-drift and L3 merged); "risk fusion" replaced by
+"decision rules" with no fused score. **Confirmed by user 2026-09-26** —
+ADR-001 Revision 1.

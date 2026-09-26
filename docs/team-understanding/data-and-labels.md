@@ -11,7 +11,7 @@ Status: Draft · Last updated: 2026-09-26
 | **Synthetic** | Data we will generate to mimic the PS shape | Not yet (design under review) | "Synthetic data" — never "real" |
 | **Illustrative** | Example numbers in docs (e.g. 10/45/50 µA) | — | "Illustrative" — never a result |
 
-Every chart, table and slide must say which kind it uses.
+Every chart, table and slide must say which kind it uses. Decided in [ADR-003](../decisions/ADR-003-dataset-strategy.md).
 
 ## 2. What each kind can prove
 
@@ -38,6 +38,7 @@ The PS does not define it. So we use **proxy labels**, always named:
 | `label_safety_slope` | Actual 0→168h drift rate exceeds the safety slope (drift allowance ÷ 168 h) or the 168h value is beyond the limit ([ADR-002](../decisions/ADR-002-safety-slope-and-drift-rate.md)) |
 | `scenario` | Synthetic only: which behaviour was generated |
 
+**Primary label: `label_safety_slope`** ([ADR-004](../decisions/ADR-004-primary-proxy-label.md)); the others are reported alongside it.
 A proxy is not a real field failure. We never claim otherwise.
 
 ## 5. The self-deception trap (circularity)

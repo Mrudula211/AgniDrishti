@@ -1,6 +1,6 @@
 # Synthetic Data Design (for review — nothing generated)
 
-Status: Draft — **requires design review before any generator is implemented** · Last updated: 2026-09-26
+Status: Accepted (design approved by user 2026-09-26, Decision 5) — generator implementation still requires P1 authorisation (CLAUDE §0) · Last updated: 2026-09-26
 
 Supersedes dataset-strategy.md §3 (moved here). Category: **Synthetic** — never
 "real", "hardware", "ISRO" or "SIH" data.
@@ -73,16 +73,30 @@ held out: never used while designing or tuning any detector; used only in R-01.
 
 | # | Question | Options |
 |---|---|---|
-| Q1 | Who defines held-out families 19–20? | A team member not writing detectors |
+| Q1 | Who defines held-out families 19–20? | **Decided:** a teammate who does not write or tune detectors (and not Claude). Owner: **TBD — team to name** |
 | Q2 | Level distributions | Log-normal for current-like; normal for delay-like (assumptions) |
 | Q3 | Drift allowance Δ used to label | ADR-002 accepted: Δ_allow swept over a pre-registered grid |
 | Q4 | Lot sizes / number of lots | Swept; minimum set by split needs (train/val/cal/test lots) |
 | Q5 | Should NASA-derived shapes inform any family? | Only qualitatively, documented, not fitted |
 
-## 6. Review checklist (must be signed off before implementation)
+## 6. Review checklist
 
-- [ ] Every family has a written mechanism and stated assumptions
-- [ ] Held-out families sealed with hash
-- [ ] Sweep grids fixed before any detector result is seen
-- [ ] Label rules fixed and linked to ADR-002
-- [ ] Reviewer name and date recorded here
+- [x] Design approved — by the user, 2026-09-26 (Decision 5)
+- [x] Families 1–18 have a written mechanism and stated assumptions (§3); detailed distributions are written into the generator config in P1
+- [ ] Held-out families 19–20 written and sealed (procedure §7) — owner TBD
+- [ ] Sweep grids fixed before any detector result is seen (to be written into the config at the start of P1)
+- [x] Label rules fixed and linked to ADR-002 (`label_spec_168h`, `label_safety_slope`)
+
+## 7. Sealing procedure for held-out families 19–20
+
+1. The owner writes both families (mechanism, parameters, prevalence) in a config
+   file kept **outside the repository** and not shared with anyone writing detectors (including Claude).
+2. The owner records the file's SHA-256 and the date in the table below.
+3. The file is handed over only when R-01 runs; its hash is checked first, and the
+   run log records the match.
+4. If the families are ever seen by a detector author before R-01, record that here;
+   R-01 then no longer counts as a held-out test.
+
+| Owner | Date sealed | SHA-256 | Opened for R-01 |
+|---|---|---|---|
+| TBD | — | — | — |

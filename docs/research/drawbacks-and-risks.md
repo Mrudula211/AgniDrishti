@@ -68,8 +68,8 @@ Status values: **Open** · **Proposal pending confirmation** · **Decided (ADR-x
 | Advantages | Controlled scenarios |
 | Disadvantages | Circularity; no real performance claim |
 | Experiment required | R-01, R-02 |
-| Decision required | Accept dataset strategy |
-| Current status | Open (strategy drafted) |
+| Decision required | — |
+| Current status | **Decided (ADR-003)** 2026-09-26 — accepted limitation; organisers to be asked for sample data |
 
 ### GAP-05 Failure-label definition unknown
 
@@ -83,8 +83,8 @@ Status values: **Open** · **Proposal pending confirmation** · **Decided (ADR-x
 | Advantages | Transparent |
 | Disadvantages | Proxies may differ from evaluator labels |
 | Experiment required | All E1–E6 per label |
-| Decision required | Which proxy is primary |
-| Current status | Open |
+| Decision required | — |
+| Current status | **Decided (ADR-004)** 2026-09-26 — primary `label_safety_slope`; organiser definition still desirable |
 
 ### GAP-06 Number / type of parameters unknown
 
@@ -124,12 +124,12 @@ Status values: **Open** · **Proposal pending confirmation** · **Decided (ADR-x
 | Why it matters | Sets operating point |
 | Evidence | None |
 | Current assumption | None |
-| Possible solutions | Report full curve; choose working budget with team (future ADR-003) |
+| Possible solutions | Recall-first target R* + full curve ([ADR-005](../decisions/ADR-005-operating-point.md)) |
 | Advantages | No hidden tuning |
 | Disadvantages | No single headline number |
 | Experiment required | E6 |
-| Decision required | Working budget |
-| Current status | Open |
+| Decision required | R* value before E6 |
+| Current status | **Decided (ADR-005)** 2026-09-26 — recall-first with full curve; R* to be pre-registered |
 
 ### GAP-09 Meaning of "early rejection" operationally
 
@@ -178,12 +178,12 @@ Compact form; all rows use the required fields. "Exp." = experiment required.
 | D-07 | Bad-lot problem (whole lot drifts) | Lot-relative methods see it as normal | EI | — | Absolute drift allowance + spec backstop | Covers it | Needs Δ | ADR-002 §8 step 5 | With ADR-002 | Open |
 | D-08 | Cross-lot shift | Model trained on some lots fails on others | S-11 | Lot-grouped splits | Lot-relative features; group-aware calibration | — | — | E4/E5 | No | Open |
 | D-09 | Temporal leakage | Inflated results | CLAUDE §7 | Availability matrix | Automated tests | — | — | Tests | No | Open |
-| D-10 | Synthetic circularity | Inflated results | C-11 | Design rules | [synthetic-data-design.md](datasets/synthetic-data-design.md) held-out families | — | Cost | R-01 | Generator design review | Open |
+| D-10 | Synthetic circularity | Inflated results | C-11 | Design rules | [synthetic-data-design.md](datasets/synthetic-data-design.md) held-out families sealed by a non-detector author | — | Cost | R-01 | Design approved 2026-09-26 | Open until families 19–20 sealed |
 | D-11 | External-domain mismatch (NASA) | Misleading transfer | external-dataset-compatibility | Methodology only | Keep separate | — | Small n | R-04 | No | Accepted limitation |
 | D-12 | Extrapolation 24h → 168h (7×) | Large errors on high-risk tail; trees cannot extrapolate (M-05) | EI | Simple models first | Tail error metric; PI | — | — | E4 | No | Open |
 | D-13 | MAE vs FN tension | MAE rewards average accuracy; FN depends on the tail | R0 | Report both | Separate point predictor (MAE) and flag rule (interval-aware) | Both served | Two numbers to explain | E4/E5 | No | Open |
 | D-14 | Uncertainty under lot shift | Coverage fails per lot | S-11, S-12 | Lot-level calibration | Report per-lot coverage; hierarchical conformal (S-11) | — | Needs many lots | E5 | Later | Open |
-| D-15 | Review burden | Useless if everything → REVIEW | EI | — | Report curve; budget | — | — | E6 | GAP-08 | Open |
+| D-15 | Review burden | Useless if everything → REVIEW | EI | — | Report curve; recall-first operating point (ADR-005) | — | — | E6 | Decided (ADR-005) | Open until E6 |
 | D-16 | False rejection of good parts | Cost, yield | EI | — | Report FRR | — | — | E6 | No | Open |
 | D-17 | Explainability quality | Evaluated by R0 | R0 | Rule-based evidence | Templates; QA-reader test | Faithful | Not SHAP-style visuals | E6 qual. | No | Open |
 | D-18 | Parameter directionality | Delays/currents may degrade either way | R0 | Direction per parameter config | Two-sided rules | — | Config burden | Unit tests | No | Open |
@@ -191,6 +191,6 @@ Compact form; all rows use the required fields. "Exp." = experiment required.
 | D-20 | Missing data | Silent PASS risk | NFR-01 | → REVIEW | Fail-safe | Safe | Review load | R-03 | No | Open |
 | D-21 | Operational adoption | QA may not trust it | EI | Advisory only | Audit trail; override | — | — | — | No | Open |
 | D-22 | Scalability | Unmeasured | — | Batch per lot, O(n) stats | Measure | — | — | NFR-07/08 | No | TBD — experiment not yet executed |
-| D-23 | Reproducibility | Required | CLAUDE §8 | Config + seed + commit | **No git repository exists yet** | — | — | — | Initialise git (team) | Open |
+| D-23 | Reproducibility | Required | CLAUDE §8 | Config + seed + commit | Git repository with remote; branch per change (CLAUDE §26) | — | — | — | — | Resolved (git in place) |
 | D-24 | Prior art overlaps core ideas | Weak novelty story | S-02, S-06 | Proposal wording | [novelty-boundaries.md](prior-art/novelty-boundaries.md) | Credible | Less "novel" | — | No | Accepted limitation |
-| D-25 | Idea-submission deadline (30 Sep 2026) before any experiment | Idea PDF can contain no results | S-16, S-17 | — | Idea PDF states proposals + experiment plan only | Honest | — | — | Scope of idea PDF | Open |
+| D-25 | Idea-submission deadline (30 Sep 2026) before any experiment | Idea PDF can contain no results | S-16, S-17 | — | Idea PDF states proposals + experiment plan only | Honest | — | — | Decided 2026-09-26 | Draft built (docs/presentation/idea-submission-content.md); team review + upload pending |

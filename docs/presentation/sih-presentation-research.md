@@ -54,7 +54,9 @@ Full list: [judge-questions.md](judge-questions.md).
 1. **Two decks, not one.** (a) the 6-slide idea PDF due 30 Sep 2026 — proposals
    and plan only, no results exist; (b) the finale deck from recorded
    experiments ([slide-plan.md](slide-plan.md)).
-2. **Idea PDF mapping to the fixed template** (content only; not built):
+2. **Idea PDF mapping to the fixed template** — built 2026-09-26 after team
+   approval (Decision 2): text in [idea-submission-content.md](idea-submission-content.md),
+   deck in [sih2026-idea-agnidrishti.pptx](sih2026-idea-agnidrishti.pptx):
 
    | Template slide | Content |
    |---|---|

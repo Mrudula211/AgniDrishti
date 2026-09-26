@@ -8,6 +8,12 @@ labelled; originality wording per [novelty-boundaries.md](../research/prior-art/
 the only numbers are the PS's own 10 / 45 / 50 µA illustration and cited
 formulas. Fill `[…]` placeholders before export.
 
+Filled official template: [sih2026-idea-agnidrishti.pptx](sih2026-idea-agnidrishti.pptx)
+(6 slides; instructions slide removed; template headings kept verbatim).
+Before upload: replace `[TEAM ID]` / `[TEAM NAME]` on slide 1 and in the oval
+on slides 2–6, then File → Export → PDF (the portal accepts PDF only).
+If this text changes, update the deck to match (this file is the source of truth).
+
 ---
 
 ## Portal fields

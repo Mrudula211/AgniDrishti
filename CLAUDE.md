@@ -68,21 +68,20 @@ Data Quality Gate
 ↓
 Absolute Specification Check
 ↓
-Lot-Relative Analysis
-↓
-Trajectory / Drift Analysis
+Lot-Relative Analysis (level + drift / trajectory)
 ↓
 168h Prediction
 ↓
-Uncertainty Estimation
+Uncertainty Estimation (conditional — kept only if E5 supports it)
 ↓
-Risk Fusion
+Ordered Decision Rules (incl. safety-slope rule; no fused risk score)
 ↓
-PASS / REVIEW / REJECT
+PASS / REVIEW / REJECT (+ binary flag)
 ↓
 Engineer-Readable Explanation
 
-This is a PROVISIONAL architecture (see `docs/decisions/ADR-001-initial-architecture.md`).
+This is a PROVISIONAL architecture (see `docs/decisions/ADR-001-initial-architecture.md`,
+Revision 1 of 2026-09-26).
 It must be validated experimentally before being treated as final.
 Every layer after the specification check must earn its place in the ablation study.
 
@@ -259,7 +258,7 @@ Accuracy alone is insufficient and must never be the headline metric
 3. Static + lot + trajectory
 4. Static + lot + trajectory + 168h prediction
 5. Previous + uncertainty
-6. Full risk engine
+6. Full decision rules (the "risk engine": ordered rules, no fused score — ADR-001 Rev. 1)
 
 If a component does not improve the evidence, consider removing it.
 Do not keep complexity for presentation value.

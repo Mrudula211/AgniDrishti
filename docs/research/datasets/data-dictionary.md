@@ -33,8 +33,8 @@ earlier checkpoints.
 
 | Column | Type | Definition | Status |
 |---|---|---|---|
-| `label_spec_168h` | bool | `value_168h` outside [`spec_min`, `spec_max`] | Proposed proxy (A-06) |
-| `label_safety_slope` | bool | (`value_168h` − `value_0h`)/168 h > Δ_allow/168 h, or `value_168h` beyond the datasheet limit — [ADR-002](../../decisions/ADR-002-safety-slope-and-drift-rate.md) §11 | Proxy label; formula accepted, Δ_allow swept (no default) |
+| `label_spec_168h` | bool | `value_168h` outside [`spec_min`, `spec_max`] | **Secondary** proxy ([ADR-004](../../decisions/ADR-004-primary-proxy-label.md)) |
+| `label_safety_slope` | bool | (`value_168h` − `value_0h`)/168 h > Δ_allow/168 h, or `value_168h` beyond the datasheet limit — [ADR-002](../../decisions/ADR-002-safety-slope-and-drift-rate.md) §11 | **Primary** proxy ([ADR-004](../../decisions/ADR-004-primary-proxy-label.md)); formula accepted, Δ_allow swept (no default) |
 | `label_latent` | bool | Official failure label, if provided | Unknown |
 | `scenario` | string | Synthetic scenario tag | Synthetic data only |
 

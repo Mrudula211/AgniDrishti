@@ -14,7 +14,7 @@ screen must show the data category at all times.
 | 2 | Data-quality summary; any blocked components already in REVIEW | L0 | Run output |
 | 3 | Static screening result: the featured component PASSES the limit | L1 | Run output |
 | 4 | Lot view: the component's position vs lot median (robust z) | L2 | Run output |
-| 5 | Trajectory: 0h→24h drift vs lot drift | L3 | Run output |
+| 5 | Trajectory: 0h→24h drift vs lot drift | L2 (drift) | Run output |
 | 6 | Predicted 168h value | L4 | Run output |
 | 7 | Prediction interval; its upper end vs limit / safety slope | L5 | Run output |
 | 8 | Decision: REVIEW (or whatever the run produced) with fired rule | L6 | Run output |

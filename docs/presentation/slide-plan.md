@@ -16,7 +16,7 @@ theory) goes to backup slides, not the main flow.
 | 2 | The hidden failure problem | One trajectory below the limit but far from its lot (labelled synthetic) | Synthetic dataset v1 | P1 |
 | 3 | Why static screening misses it | E1 result: cases passing static check | E1 | E1 |
 | 4 | Core insight | Spec + peers + trajectory + uncertainty | Story beat 3 | — |
-| 5 | Architecture (proposed) | L0–L7 pipeline, T24/T96 checkpoints | system-architecture.md | — |
+| 5 | Architecture (proposed) | 7-layer pipeline (ADR-001 Rev. 1), T24 (Module B) + optional T96 | system-architecture.md | — |
 | 6 | Lot-relative analysis | Lot distribution + component position | E2 | E2 |
 | 7 | Trajectory + 168h prediction | Trajectory map with predicted 168h point | E3, E4 | E4 |
 | 8 | Uncertainty + REVIEW | Interval crossing limit → REVIEW | E5 | E5 |

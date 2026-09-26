@@ -32,8 +32,8 @@ open decisions) and the plain-language team guides in
 
 ```
 Data quality gate → Absolute spec check → Lot-relative analysis (level + drift)
-→ Trajectory features → 168h prediction → Prediction interval → Rule-based risk fusion
-→ PASS / REVIEW / REJECT → Engineer-readable explanation
+→ 168h prediction → Prediction interval (if it earns its place) → Ordered decision rules
+→ PASS / REVIEW / REJECT (+ binary flag) → Engineer-readable explanation
 ```
 
 Simple, transparent methods first (robust statistics, simple regression);
