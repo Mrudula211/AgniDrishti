@@ -2,7 +2,7 @@
 
 **SIH 2026 — Problem Statement 26170: AI-Driven Anomaly Detection in Component Burn-In & Screening**
 
-> **Status: working prototype (P2–P7 built 2026-09-26) — evaluated on SYNTHETIC data only.** Implemented: canonical schema, data-quality gate,
+> **Status: working prototype (P2–P7 built 2026-09-26) — evaluated on SYNTHETIC data only.**
 > Pipeline: quality gate → datasheet limit → lot-relative level/drift → 168 h prediction → prediction interval →
 > ordered PASS/REVIEW/REJECT rules → evidence card. No official PS dataset exists; nothing here is ISRO hardware data.
 
