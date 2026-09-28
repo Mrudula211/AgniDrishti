@@ -14,8 +14,8 @@ R2 aggressive blueprint, R3 conservative correction) plus an assessment (R4).
 **Update 2026-09-26 (context only; decision unchanged):** the official PS text
 (R0) is now in hand and confirms Module B = 0h + 24h → 168h; no official
 dataset exists. Validation item 1 below is satisfied. A layer-by-layer
-re-evaluation after the prior-art pass proposes merging L2-drift with L3 and
-dropping a fused risk score — see
+re-evaluation after the prior-art pass proposed merging L2-drift with L3 and
+dropping a fused risk score — confirmed as Revision 1 below — see
 [system-architecture.md](../architecture/system-architecture.md) §7 (pending team confirmation).
 
 ## Problem
@@ -74,3 +74,21 @@ Each layer is kept only if the ablation shows value.
 
 This ADR moves to **Accepted** only after E6 has been run and each retained
 layer is justified by recorded evidence.
+
+## Revision 1 — 2026-09-26 (confirmed by user, Decision 3)
+
+Basis: layer re-evaluation in [system-architecture.md](../architecture/system-architecture.md) §7.
+
+| Change | Reason |
+|---|---|
+| **L3 retired; drift / trajectory features merged into L2** ("lot-relative analysis of level and drift"). Layer IDs L0, L1, L2, L4–L7 are kept unchanged so experiment and requirement references stay stable. | At T24 there is one increment (0h→24h); a separate trajectory layer computed the same quantity L2-drift scores. Slope change at T96 stays available inside L2 for the optional T96 extension |
+| **No fused risk score.** L6 is an ordered, documented rule set ("decision rules"); a weighted score may be used only as a ranking aid, never as a decision input or probability | A fused score adds an unexplainable number; ordered rules are directly explainable (OPS-07) |
+| **L5 (prediction interval) is conditional** — kept only if E5 shows near-target per-lot coverage and a useful change in decisions | Not a PS requirement; lot structure threatens coverage (S-11) |
+| **Binary output always emitted** alongside PASS/REVIEW/REJECT (FR-16) | Hidden scoring likely needs a flag (anomaly-detection-score.md §5) |
+
+Resulting pipeline (7 layers):
+Data-quality gate (L0) → Datasheet limit (L1) → Lot-relative level + drift (L2)
+→ 168h prediction (L4) → [conditional] Prediction interval (L5) → Decision rules
+incl. safety-slope rule (L6) → Explanation + audit (L7).
+
+Status of this ADR stays **Proposed** until E6 evidence exists.

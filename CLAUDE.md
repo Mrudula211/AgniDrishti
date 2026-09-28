@@ -22,24 +22,46 @@ potential future degradation.
 
 # 0. Current Phase (read first)
 
-**Phase: RESEARCH + ARCHITECTURE + DOCUMENTATION (P0).**
+**Phase: DEPLOYABLE PROTOTYPE BUILT — awaiting team review** (P2–P7 completed 2026-09-26;
+deployable screening service, site calibration and audit trail added 2026-09-28 at the team's
+request, [ADR-006](docs/decisions/ADR-006-deployable-service.md); results in
+`docs/research/experiments/ablation-plan.md` §3–§5; v1 test split spent — changes need a
+new pre-registered config and fresh data). Authorisation record: P2–P7 authorised by the team 2026-09-26 (
+"do everything as per you", end product in 2 days). P1 data foundation is done.
+Experiment values are pre-registered in `configs/experiments/pipeline_v1.yaml`.
 
-During this phase:
+Build one layer per change, in this order, each with tests and its recorded
+experiment on validation lots: L1 + metrics (E1) → L2 lot-relative level/drift
+(E2, E3) → L4 168h prediction + safety-slope rule (E4) → L5 interval (E5) → L6
+decision rules (E6) → L7 explanations → one final test-lot evaluation →
+prototype CLI + demo built only from recorded outputs.
 
-- The project is research-first.
-- Do NOT write implementation code (no models, no data generators, no
-  preprocessing code, no app, no API, no dashboard, no training pipeline).
-- Do NOT create Python modules, `__init__.py` files, empty classes, stubs or
-  placeholder interfaces.
-- Work products are documents under `docs/` and repository scaffolding only.
-- No implementation may begin without a documented requirement in
-  `docs/requirements/requirements-specification.md` and a planned experiment in
-  `docs/research/experiments/experiment-plan.md`.
+Earlier P1 scope (kept for record):
+
+Scope of P1 (narrow, in this order):
+
+- `pyproject.toml` with minimal, justified dependencies.
+- Canonical schema + raw→canonical column mapping (FR-01).
+- Data-quality gate (FR-02) with unit tests, including checkpoint-availability
+  (leakage) tests.
+
+Still NOT allowed in P1 until their gates are met:
+
+- ~~Synthetic data generator~~ — gate met 2026-09-26 (families sealed, grids
+  pre-registered); development generator + E0 audit implemented (FR-17–FR-19).
+  Never create or reconstruct held-out families 19–20.
+- ~~Experiments E1–E6~~ — gate met 2026-09-26 (pre-registration above).
+- Still not allowed: advanced / black-box models (CLAUDE §4), a database,
+  notebooks with production logic, any number in the demo that does not come
+  from a recorded run. (The web service is allowed since 2026-09-28, ADR-006.)
+
+No implementation may begin without a documented requirement in
+`docs/requirements/requirements-specification.md` and a planned experiment in
+`docs/research/experiments/experiment-plan.md`.
 
 The phase changes only when the team explicitly says so. When it changes,
-update this section and `README.md` in the same change.
-
-Implementation will start with the step in `docs/roadmap/implementation-plan.md`.
+update this section, `README.md`, `docs/project-state.md` and
+`docs/roadmap/implementation-plan.md` in the same change.
 
 ---
 
@@ -68,21 +90,20 @@ Data Quality Gate
 ↓
 Absolute Specification Check
 ↓
-Lot-Relative Analysis
-↓
-Trajectory / Drift Analysis
+Lot-Relative Analysis (level + drift / trajectory)
 ↓
 168h Prediction
 ↓
-Uncertainty Estimation
+Uncertainty Estimation (conditional — kept only if E5 supports it)
 ↓
-Risk Fusion
+Ordered Decision Rules (incl. safety-slope rule; no fused risk score)
 ↓
-PASS / REVIEW / REJECT
+PASS / REVIEW / REJECT (+ binary flag)
 ↓
 Engineer-Readable Explanation
 
-This is a PROVISIONAL architecture (see `docs/decisions/ADR-001-initial-architecture.md`).
+This is a PROVISIONAL architecture (see `docs/decisions/ADR-001-initial-architecture.md`,
+Revision 1 of 2026-09-26).
 It must be validated experimentally before being treated as final.
 Every layer after the specification check must earn its place in the ablation study.
 
@@ -259,7 +280,7 @@ Accuracy alone is insufficient and must never be the headline metric
 3. Static + lot + trajectory
 4. Static + lot + trajectory + 168h prediction
 5. Previous + uncertainty
-6. Full risk engine
+6. Full decision rules (the "risk engine": ordered rules, no fused score — ADR-001 Rev. 1)
 
 If a component does not improve the evidence, consider removing it.
 Do not keep complexity for presentation value.
@@ -691,9 +712,9 @@ Do not leave obsolete files merely because they were previously generated.
 
 # 29. Development Priority
 
-P0 Research and requirements  ← current
-P1 Dataset strategy and data validation
-P2 Baselines
+P0 Research and requirements  (done 2026-09-26)
+P1 Dataset strategy and data validation  (done 2026-09-26)
+P2 Baselines  ← current (P2–P7 authorised together, one layer per change)
 P3 Lot-relative and trajectory analysis
 P4 168h prediction
 P5 Uncertainty and risk engine

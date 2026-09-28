@@ -21,7 +21,7 @@ The idea-round PDF (6 slides, fixed template, due 30 Sep 2026) is planned in
 | 1 | Hidden failure problem | A component can pass its limit and still be abnormal | PS text (R0 10/45/50 µA example) | Ready (R0) |
 | 2 | Why static screening misses it | Four cases table (problem-statement-analysis §4) | E1 on stated data | TBD — experiment not yet executed |
 | 3 | Core insight | Compare against spec **and** peers **and** trajectory | — | — |
-| 4 | Architecture | L0–L7, marked "proposed" until E6 | ADR-001 | Proposed |
+| 4 | Architecture | 7-layer pipeline (ADR-001 Rev. 1), marked "proposed" until E6 | ADR-001 | Proposed |
 | 5 | Lot-relative intelligence | Robust z of level and drift | E2 | TBD — experiment not yet executed |
 | 6 | Trajectory intelligence | Checkpoint slopes; why not LSTM on 4 points | E3; M-01 argument | TBD — experiment not yet executed |
 | 7 | 168h prediction | 0h+24h → 168h; simple models first | E4 | TBD — experiment not yet executed |

@@ -54,7 +54,9 @@ Full list: [judge-questions.md](judge-questions.md).
 1. **Two decks, not one.** (a) the 6-slide idea PDF due 30 Sep 2026 — proposals
    and plan only, no results exist; (b) the finale deck from recorded
    experiments ([slide-plan.md](slide-plan.md)).
-2. **Idea PDF mapping to the fixed template** (content only; not built):
+2. **Idea PDF mapping to the fixed template** — built 2026-09-26 after team
+   approval (Decision 2): text in [idea-submission-content.md](idea-submission-content.md),
+   deck in [sih2026-idea-agnidrishti.pptx](sih2026-idea-agnidrishti.pptx):
 
    | Template slide | Content |
    |---|---|
@@ -67,4 +69,4 @@ Full list: [judge-questions.md](judge-questions.md).
 3. Never put a performance number in the idea PDF; write the experiment that
    will measure it.
 4. Show the data category on every future chart (CLAUDE §27).
-5. Ask organisers the GAP-01/03/05/10 questions early (sih@aicte-india.org).
+5. ~~Ask organisers the GAP questions~~ — team decided 2026-09-26 not to contact organisers (ADR-003 amendment); state our definitions openly instead.

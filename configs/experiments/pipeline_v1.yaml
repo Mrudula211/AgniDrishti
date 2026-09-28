@@ -1,0 +1,48 @@
+# AgniDrishti experiments E1-E6 — PRE-REGISTERED 2026-09-26, before any detector,
+# predictor or decision code existed. Do not edit values after results are seen;
+# add a new config version with a dated note instead (experiment-plan.md §Pre-registration).
+
+dataset:
+  path: data/synthetic/development/synthetic_development_v1_seed20260926.csv
+  sha256: 7a170d89efb3ea8a7b90ae3639f5a4b8e760c8167391f3872e457de20491cde0
+  category: synthetic
+  development_split: validation     # all E1-E6 development results
+  fit_splits: {model: train, conformal: calibration}
+  final_split: test                 # evaluated once, after the pipeline is frozen
+
+checkpoint: T24                     # Module B decision time (R0)
+
+label:                              # ADR-004 primary proxy label
+  primary: label_safety_slope
+  allowance: {kind: relative, value: 0.15}   # headline Δ_allow (ADR-002); grid reported separately
+  directions: {iddq: up, tpd: up}
+
+quality_gate:                       # L0
+  min_lot_size: 20                  # AEC-Q001 Rev-D notes IQR/1.35 is inexact below 20 (S-01)
+  scale_floor_fraction_of_nominal: 0.001
+
+lot_relative:                       # L2
+  scale: iqr                        # AEC-Q001 robust sigma = IQR / 1.35; MAD reported as a variant
+  reject_z: 6.0                     # AEC-Q001 Dynamic PAT: median ± 6 robust sigma
+  review_z_grid: [2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0]   # chosen on validation by ADR-005
+
+prediction:                         # L4
+  models: [persistence, linear_extrapolation, population_increment, linear_regression]
+  selection: lowest validation MAE  # MAE is the official Module B metric (R0)
+  tail_quantile: 0.9                # tail error: rows whose true value_168h is in the top decile of their lot
+
+uncertainty:                        # L5
+  method: split_conformal_absolute_residual
+  alpha: 0.10                       # target 90 % marginal coverage
+
+operating_point:                    # ADR-005
+  target_recall: 0.95               # R*, REVIEW counted as flagged, on the primary label
+  review_counts_as_flagged: true
+
+success_criteria:
+  E1: none — establishes the baseline
+  E2: recall on primary label above E1, with FPR increase <= 0.05 (absolute)
+  E3: recall above E2 on drift families, with FPR increase <= 0.05 over E2
+  E4: chosen predictor MAE below persistence (B0) on validation, and its tail MAE not worse than B0
+  E5: empirical coverage within 0.05 of 0.90 overall on validation
+  E6: reaches R* on validation at a lower review rate than E5's interval rules alone; else simplify

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agnidrish"
+version = "0.1.0"
+description = "AgniDrishti — burn-in screening for SIH 2026 PS 26170"
+requires-python = ">=3.11"
+dependencies = [
+    # Lot tables: grouping by lot/parameter, missing-value handling (FR-01, FR-02).
+    "pandas>=2.0,<3",
+    # Vectorised finite-value checks and seeded random generation; already required by pandas.
+    "numpy>=1.24,<3",
+    # Experiment configs are YAML (CLAUDE.md §17: configs/<area>/<name>.yaml).
+    "pyyaml>=6,<7",
+]
+
+[project.optional-dependencies]
+# Web service (P7, ADR-006): FastAPI gives request validation and an OpenAPI description of the
+# screening API; uvicorn is its production ASGI server. Uploads are sent as a raw text/csv body,
+# so python-multipart is not needed.
+serve = ["fastapi>=0.110,<1", "uvicorn>=0.29,<1"]
+# httpx is required by fastapi.testclient for the API integration tests.
+dev = ["pytest>=7.4,<9", "httpx>=0.27,<1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+testpaths = ["tests"]

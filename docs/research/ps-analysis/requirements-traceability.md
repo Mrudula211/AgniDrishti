@@ -36,7 +36,7 @@ PSR-05→OPS-05, PSR-06→OPS-07; OPS-06 (MAE) is new — see its row.
 |---|---|---|---|
 | Data quality gate | PSR-05 (no silent PASS) | Always (safety) | Fault-injection tests |
 | Prediction interval | PSR-04, PSR-05 | Coverage close to target on held-out lots **and** E5 changes decisions usefully | E5 |
-| Risk fusion / PASS-REVIEW-REJECT | PSR-05 | E6 improves escape rate at acceptable review rate vs E5 simple rules | E6 |
+| Decision rules / PASS-REVIEW-REJECT (no fused score, ADR-001 Rev. 1) | PSR-05 | E6 improves escape rate at acceptable review rate vs E5 simple rules | E6 |
 | Trajectory map (visual) | PSR-06 | Generated from real run outputs | — |
 | Advanced predictor (GBM / hierarchical) | PSR-03 | Beats simple baselines on held-out lots incl. tail | E4b (conditional) |
 | Isolation Forest comparator | PSR-02 | Comparator only | E2b (conditional) |

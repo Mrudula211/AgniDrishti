@@ -189,8 +189,8 @@ D-01) is exactly a part whose *current* value is acceptable but whose
 `[PR]` Architecture (provisional, see [ADR-001](../decisions/ADR-001-initial-architecture.md)):
 
 Data quality gate → absolute spec check → lot-relative scoring (level + drift)
-→ trajectory features → 168h prediction → prediction interval → rule-based risk
-fusion → PASS/REVIEW/REJECT → evidence-based explanation.
+(incl. trajectory features) → 168h prediction → prediction interval (conditional) → ordered
+decision rules → PASS/REVIEW/REJECT → evidence-based explanation. (Revised 2026-09-26, ADR-001 Rev. 1.)
 
 Two operating checkpoints `[PR]`: **T24** (0h+24h available; Module B early
 decision) and **T96** (0h/24h/96h). 168h is used only as ground truth for

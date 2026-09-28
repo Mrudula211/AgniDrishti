@@ -2,7 +2,7 @@
 
 Status: Proposed · Last updated: 2026-09-26
 
-Layers L2–L5. "ML" is used loosely: most layers are robust statistics or simple
+Layers L2, L4, L5 (L3 merged into L2 — ADR-001 Revision 1). "ML" is used loosely: most layers are robust statistics or simple
 regression by design. Advanced methods appear only as conditional extensions.
 
 ---
@@ -13,7 +13,7 @@ regression by design. Advanced methods appear only as conditional extensions.
 |---|---|
 | Purpose | Module A: measure how abnormal a component is relative to its lot (PSR-02) |
 | Inputs | Lot table at checkpoint T (values and drifts available at T) |
-| Outputs | `z_level_t`, `z_drift_t`, lot median, lot robust scale |
+| Outputs | `z_level_t`, `z_drift_t`, drift features (below), lot median, lot robust scale |
 | Assumptions | A-04, A-05, A-07 |
 | Candidate methods | Robust z with median and 1.4826·MAD; the same on drift; one-sided (upper) and two-sided variants |
 | Alternatives | AEC-Q001 Rev-D DPAT formula: median ± 6·(IQR/1.35) (verified, S-01) — proposed as the E2 **baseline** variant; classical z (to show why robust matters); Isolation Forest (comparator, E2b); robust Mahalanobis on (level, drift) |
@@ -26,7 +26,9 @@ measurement resolution, config) to avoid division by ~0.
 
 ---
 
-## L3 — Trajectory / Drift Features
+## L2 (drift part) — Drift / Trajectory Features
+
+Formerly layer L3; merged into L2 on 2026-09-26 (ADR-001 Revision 1). Content unchanged.
 
 | Item | Content |
 |---|---|

@@ -26,6 +26,7 @@ artifacts/**/*
 !artifacts/**/.gitkeep
 
 # OS / editors
+~$*
 .DS_Store
 Thumbs.db
 desktop.ini

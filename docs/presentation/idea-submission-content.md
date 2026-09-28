@@ -1,12 +1,22 @@
 # Idea-Round Submission Content (SIH 2026, PS 26170)
 
-Status: Draft for team review · Last updated: 2026-09-26 · Deadline: **30 Sep 2026**
+Status: Draft for team review · Last updated: 2026-09-26 (Rev. 2 — diagram-first redesign) · Deadline: **30 Sep 2026**
 
 Source text for the portal fields and the 6-slide official template (S-17).
 Rules applied: no performance numbers (no experiment has run); proposals
 labelled; originality wording per [novelty-boundaries.md](../research/prior-art/novelty-boundaries.md);
-the only numbers are the PS's own 10 / 45 / 50 µA illustration and cited
-formulas. Fill `[…]` placeholders before export.
+no numbers appear on the slides. The PS's own 10 / 45 / 50 µA illustration
+(R0, verbatim) is kept only in the slide 2 speaker notes, attributed to the PS.
+
+Deck: [sih2026-idea-agnidrishti.pptx](sih2026-idea-agnidrishti.pptx) ·
+exported PDF: [sih2026-idea-agnidrishti.pdf](sih2026-idea-agnidrishti.pdf)
+(6 slides; template headings and idea-detail pointers kept verbatim, as S-17
+requires). Formulas and talk track are in each slide's speaker notes.
+Before upload: replace `[TEAM ID]` on slide 1, then File → Export → PDF (the
+portal accepts PDF only) and re-check all six pages.
+If this text changes, update the deck to match (this file is the source of truth).
+
+Story: **static screening → trajectory-aware screening.** One message per slide.
 
 ---
 
@@ -36,117 +46,145 @@ ablation study on clearly labelled synthetic and public NASA data.
 
 ---
 
-## Slide 1 — Title page
+## Slide 1 — Title page (hierarchy only)
 
-- Problem Statement ID – 26170
-- Problem Statement Title – AI-Driven Anomaly Detection in Component Burn-In & Screening
-- Theme – Smart Automation
-- PS Category – Software
-- Team ID – [TEAM ID]
-- Team Name – [TEAM NAME]
+AgniDrishti · *Static screening → trajectory-aware burn-in screening* ·
+PS ID 26170 · official PS title · Theme Smart Automation · Category Software ·
+Team ID `[TEAM ID]` · Team Name Regnum Carya.
 
-## Slide 2 — Idea title / Proposed solution
+## Slide 2 — AgniDrishti / Proposed solution
 
-**AgniDrishti: from static pass/fail to lot-relative, drift-predictive screening**
+Message: *static screening misses in-spec parts that are abnormal or drifting.*
 
-Problem (PS example): lot average 10 µA · part at 45 µA · datasheet max 50 µA → static test says PASS.
-
-Proposed solution, per lot, per checkpoint:
-- **Data-quality gate** — missing / invalid data → REVIEW, never PASS
-- **Datasheet limit** — the conventional check, kept as baseline
-- **Module A: lot-relative score** — how far a part's value *and* its 0→24h drift are from its lot (robust statistics)
-- **Module B: 168h prediction** — Value_0h + Value_24h → predicted Value_168h
-- **Early-rejection rule** — predicted drift rate vs a calculated safety slope
-- **Prediction interval** — how uncertain the 168h prediction is
-- **Decision** — PASS / REVIEW / REJECT + a quantitative explanation for the QA inspector
-
-How it addresses the PS:
-- Module A and Module B implemented as specified
-- False negatives: doubt goes to REVIEW; a binary flag counts REVIEW as flagged
-- Explainability: every decision shows its values, lot statistics, prediction, interval and the rule that fired
-
-Innovation and uniqueness (proposed integration):
-- Builds on proven screening practice — lot-relative limits (AEC-Q001 Dynamic PAT) and burn-in drift limits (ESCC 9000)
-- Adds what they lack: **predicting end-of-burn-in drift at 24h**, judged against a drift allowance and the lot, with a **lot-aware prediction interval** and a **REVIEW** path
-- Transparent by design: explanations are the actual decision evidence, not a post-hoc attribution
+- **Gap** — Conventional asks "Is it outside its specification NOW?":
+  current value → datasheet limit → PASS/FAIL. Blind spot: a part can pass the
+  absolute limit yet be abnormal for its lot or drifting (R0 latent defect).
+- **AgniDrishti also asks** — abnormal vs lot peers? drifting abnormally? where
+  at 168h? how uncertain? should an engineer review it?
+- **Pipeline** — burn-in measurements → quality gate → absolute spec check →
+  lot-relative health (**PS Module A**) → trajectory/drift → **0h + 24h → 168h
+  forecast** → prediction uncertainty → PASS/REVIEW/REJECT (ordered rules incl.
+  safety slope) → engineer evidence card. Banner: **PS MODULE B: Value_0h +
+  Value_24h → Value_168h**.
+- **How it addresses the problem** — one-line PS map (Module A → lot health ·
+  Module B → forecast · doubt → REVIEW · explain → card); conceptual evidence
+  card (no values: spec PASS · lot ABNORMAL · trajectory DEGRADING · ‹point
+  forecast› · ‹prediction interval› · decision REVIEW · rule fired); and a
+  unitless **trajectory sketch labelled "sketch · not data"**: lot band, dashed
+  datasheet limit, part in spec at 0h/24h but leaving its lot, dashed forecast
+  to 168h whose interval reaches the limit → REVIEW, never a silent PASS
+  (decision-engine rules R3/R5).
+- **Innovation and uniqueness** — "Combines static specification screening,
+  lot-relative behaviour, early trajectory analysis, 168h forecasting,
+  uncertainty and explainable review in one screening workflow." Individual
+  techniques are established; the differentiation is the PS-specific
+  integration and workflow. AEC-Q001 / ESCC 9000 are research foundations, no
+  compliance claimed.
 
 ## Slide 3 — Technical approach
 
-Technologies (proposed): Python 3.11 · NumPy · pandas · pytest · version-controlled YAML configs · lightweight demo UI (chosen later) · runs offline, batch per lot.
+Message: *a simple, layered, testable pipeline; every layer must earn its place.*
 
-Methodology (flow chart):
-
-```
-Lot data at 24h → Quality gate → Datasheet limit → Lot score (level + drift)
-   → Predict Value_168h → Drift rate vs safety slope → Prediction interval
-   → Rules → PASS / REVIEW / REJECT → Evidence card
-```
-
-Key definitions (our documented choices where the PS is silent):
-- Lot score: robust z = (x − lot median) / robust spread; baseline = AEC-Q001 Dynamic PAT (median ± 6·IQR/1.35); MAD variant compared
-- Drift rate: r = (Ŷ₁₆₈ − V₀) / 168 h
-- Safety slope: s = Δ_allow / 168 h (per-parameter drift allowance, ESCC-style) + datasheet-limit backstop; Δ is configurable and its effect is tested
-- 168h predictor, simplest first: persistence → linear extrapolation → lot-median increment → linear regression; advanced models only if they beat these on held-out lots
-- Uncertainty: split conformal prediction interval, calibrated on held-out lots, coverage reported per lot
-
-Validation plan:
-- Splits by lot; untouched final test lots; automated leakage tests (no 96h/168h value used at 24h)
-- 6-step ablation: static → + lot → + drift → + 168h prediction → + uncertainty → full rules; a layer that adds nothing is removed
-- Data: synthetic PS-shaped data (held-out scenario families, parameter sweeps) + public NASA ageing data for prediction methodology — always labelled, never presented as ISRO data
-- Why not LSTM/Transformer: 2–4 measurements per part — too few for sequence models, and harder to explain
+- Technologies: Python 3.11+ · pandas · NumPy · pytest · robust stats
+  (median · IQR · MAD) · least-squares regression · versioned YAML config ·
+  offline, CPU-first. In use now:
+  schema + data-quality gate (unit-tested); further libraries only if a
+  baseline needs them.
+- Architecture (two rows): burn-in data (CSV lot tables) → quality gate → absolute spec →
+  Module A → trajectory/drift ↵ Module B (0h + 24h → 168h) → prediction
+  interval → risk/decision engine → PASS/REVIEW/REJECT (+ binary flag) →
+  evidence + audit record (FR-11, FR-12).
+- Four blocks: lot anomaly detection (robust distance; Isolation Forest as ML
+  comparator) · **ML forecasting ladder** (persistence → linear → regression
+  on (v0, v24) → gradient-boosted trees; a model stays only if it lowers MAE
+  on held-out lots) · uncertainty (a range, not one number) · explainability.
+  Ladder and comparators are those planned in ml-pipeline.md (B0–B4, E2b).
+- Validation strip: lot-grouped splits, frozen test lots, automated leakage
+  tests, 6-step ablation. "All formulas are proposed engineering definitions
+  where the PS is silent." Formulas (ADR-002, ml-pipeline) are in the notes.
 
 ## Slide 4 — Feasibility and viability
 
-Feasibility:
-- Light statistical methods; no GPU; designed to run offline on site
-- Every threshold in configuration; every decision reproducible and auditable
-- Development path: data validation → baseline → lot score → prediction → uncertainty → decisions → explanations
+Message: *every known risk has a concrete mitigation; the build is incremental and started.*
 
 | Challenge / risk | Strategy |
 |---|---|
-| No official dataset (hidden ground truth) | Synthetic PS-shaped data with held-out scenarios + NASA public data; ready to re-run on official data |
-| Safety slope / Anomaly Score not defined in PS | Documented, configurable definitions; sensitivity analysis; clarification sought from organisers |
-| Only 2 measurements at 24h | Simple, stable predictors; honest prediction intervals; REVIEW when unsure |
-| Small, contaminated or mixed lots | Quality checks → REVIEW; drift allowance that does not depend on the lot |
-| A whole lot degrading | Absolute drift allowance + datasheet backstop, not only lot comparison |
-| Data leakage / optimistic results | Lot-grouped splits, frozen test lots, automated leakage tests |
-| Too many REVIEWs | Report the full catch-rate vs review-rate trade-off; operating point chosen with users |
+| Official dataset unavailable | Controlled synthetic PS-shaped data (always labelled) + external public aging data — methodology validation only + official-data-ready pipeline |
+| Only Value_0h and Value_24h at decision time | Simple, stable predictors + prediction interval + REVIEW path |
+| Lot contamination / mixed populations | Data-quality checks + robust (median-based) statistics |
+| Whole lot may degrade together | Absolute safety backstop in addition to lot-relative analysis |
+| Safety slope / Anomaly Score not defined in the PS | Configurable engineering definition + sensitivity analysis + organiser clarification |
+| Data leakage / optimistic results | Lot-grouped splits + frozen test lots + no future features (automated tests) |
+| Deployment in controlled facilities | Offline, CPU-first architecture; measurement data stays on site |
+
+Feasibility cards: **technical** (robust stats + least-squares regression on
+small lot tables, no GPU) · **operational** (reads checkpoints, returns
+PASS/REVIEW/REJECT, engineer override — FR-13) · **financial** (open-source
+stack, standard CPU workstation, no licence or cloud cost) · **auditable**
+(versioned config, reproducible decision record) · **already started** (schema
++ quality gate, unit-tested).
+Build path: Data (in progress, P1) → Baseline → Lot → Drift → Prediction →
+Uncertainty → Decision → Explanation.
 
 ## Slide 5 — Impact and benefits
 
-Target users: component screening / QA engineers and reliability engineers for space-grade electronics.
+Message: *same burn-in; risk is visible at 24h and attention goes where the evidence points.*
 
-Intended benefits (to be quantified by our experiments):
-- Fewer latent defects escaping into flight hardware
-- Early visibility at 24h of parts heading for excessive drift
-- Consistent, explainable, auditable decisions a QA inspector can verify
-- Engineers focus on the REVIEW queue instead of all parts
-- Better use of burn-in capacity and fewer late-stage failures and rework (economic)
-- Runs on-premises; no data leaves the facility
-
-Future progression: calibration on real ISRO burn-in data · multiple parameters per part · cross-lot history · integration with test-equipment data logs.
+- Users: component screening / QA and reliability engineers, space-grade electronics.
+- Conventional: burn-in → wait → final screening → PASS/FAIL.
+- AgniDrishti: burn-in → 24h data → early risk assessment → prioritise REVIEW
+  cases → 168h forecast → evidence-backed decision; engineer stays in the loop.
+- Pillars: **Reliability** (earlier visibility, aimed at fewer latent
+  escapes) · **Efficiency** (attention on suspicious parts, better use of
+  burn-in capacity) · **Trust** (auditable, explainable, human-in-the-loop,
+  on-premises).
+- Future: Phase 1 prototype on controlled synthetic + public data → Phase 2
+  calibrate on representative ISRO data → Phase 3 multiple parameters +
+  cross-lot history → Phase 4 test-equipment log integration.
+- "Quantitative gains will be measured after representative-data validation.
+  No results or impact figures are claimed at the idea stage."
 
 ## Slide 6 — Research and references
 
-- SIH 2026 PS 26170 (official text), sih.gov.in/sih2026PS
-- AEC-Q001 Rev-D, Guidelines for Part Average Testing, AEC, 2011
-- ESCC Generic Specification 9000, Issue 10, ESA, 2018; ESCC Detail Spec. 9202/045, Issue 6, 2020
-- I. Ahmed et al., "A data-driven modelling framework for predicting the quality of semiconductor devices to support burn-in decisions", Comput. Ind. Eng. 204, 111115, 2025
-- L. Langenberg et al., "Process Data Analysis for Improved Burn-In Strategies Based on Complementary AI Models", ESREL 2023
-- US 8,010,310 B2, "Method and apparatus for identifying outliers following burn-in testing", 2011
-- J. Lei et al., "Distribution-Free Predictive Inference for Regression", JASA 113, 2018
-- R. Dunn, L. Wasserman, A. Ramdas, "Distribution-Free Prediction Sets for Two-Layer Hierarchical Models", JASA 118, 2023
-- C. K. Chow, "On optimum recognition error and reject tradeoff", IEEE Trans. Inf. Theory 16, 1970
-- C. J. Lu, W. O. Meeker, "Using Degradation Measures to Estimate a Time-to-Failure Distribution", Technometrics 35, 1993
-- NASA PCoE: MOSFET Thermal Overstress Aging (Celaya et al.); IGBT Accelerated Aging (Celaya, Wysocki, Goebel, 2009)
+Grouped and labelled: **Official** (PS 26170; SIH 2026 Guidelines + Idea
+Presentation Format) · **Reliability foundations — research, no compliance
+claimed** (AEC-Q001 Rev-D; ESCC 9000 Issue 10; ESCC 9202/045 Issue 6) ·
+**Prior art — research** (Ahmed et al. 2025; Langenberg et al. ESREL 2023;
+US 8,010,310 B2) · **Method — research** (Lei et al. 2018; Dunn, Wasserman,
+Ramdas 2023; Lu & Meeker 1993; Chow 1970) · **Data — external public dataset,
+not SIH/ISRO data** (NASA PCoE MOSFET Thermal Overstress Aging; IGBT
+Accelerated Aging; methodology validation only). Full citations: literature-review.md.
 
 ---
 
-## Integrity check (done 2026-09-26)
+## Claim-classification gate (Rev. 2, 2026-09-26)
 
-- [x] No performance number, percentage improvement or dataset size
-- [x] No "first / novel / compliant / physics-informed / guaranteed / zero FN"
-- [x] Module B = Value_0h + Value_24h → Value_168h (R0)
-- [x] Safety slope / drift rate stated as our choice (ADR-002)
-- [x] Data categories named; NASA not presented as ISRO data
-- [x] All references verified (literature-review S-xx), none UV
+Every on-slide statement falls into one of these classes. Nothing is left
+unclassified.
+
+| Class | Statements (slide) | Basis |
+|---|---|---|
+| OFFICIAL PS | Static limits miss latent defects that drift (2); Module A dynamic lot-relative outliers (2, 3); Module B Value_0h + Value_24h → Value_168h and safety-slope early rejection (2, 3); false negatives catastrophic (2); justify decisions to a QA inspector (2); no official dataset published (4, 6) | R0; official-dataset-verification.md |
+| ESTABLISHED RESEARCH | Robust median-based statistics; prediction intervals / conformal calibration; reject option; degradation modelling; AEC-Q001 lot-relative limits; ESCC 9000 drift limits (2, 3, 6) | S-01…S-15 |
+| PROPOSED | ML comparators (Isolation Forest, gradient-boosted trees) adopted only if they beat the baseline (3); nine-stage pipeline; REVIEW state; missing data → REVIEW; ordered rules (no fused score); simplest-first forecasting; lot-grouped validation and ablation; offline CPU-first deployment; four future phases; "combines … in one workflow" differentiation (2–5) | ADR-001 Rev. 1, ADR-002…ADR-005 |
+| ASSUMPTION | Official data will follow the PS checkpoint structure; burn-in procedure itself is unchanged; benefits are intended outcomes (4, 5; notes) | assumptions-and-constraints.md |
+| UNKNOWN / OPEN | Safety-slope and Anomaly Detection Score formulas; all performance figures — **TBD — experiment not yet executed** (3, 4, 5) | GAP-01/02; experiment-plan.md |
+| FACT (repo) | Canonical schema + data-quality gate implemented and unit-tested (3, 4) | `src/agnidrish/`, `tests/unit/` |
+
+Checks done:
+
+- [x] No performance number, percentage, cost/time saving or dataset size on any slide
+- [x] No "first / novel / unique / compliant / physics-informed / guaranteed / zero FN"
+- [x] Module B = Value_0h + Value_24h → Value_168h shown prominently (slides 2, 3)
+- [x] Formulas stated as our proposed definitions; kept in speaker notes (ADR-002)
+- [x] Evidence card and trajectory sketch labelled conceptual / not data; no values or units in either
+- [x] NASA data labelled "external public dataset · not SIH/ISRO data · methodology validation only"
+- [x] AEC-Q001 / ESCC described as research foundations, no compliance
+- [x] PDF exported and all six pages inspected visually (no overlap, no overflow)
+- [ ] `[TEAM ID]` filled in (team action)
+
+Judge 60-second test: (1) what is wrong with static screening → slide 2 gap
+panel; (2) what AgniDrishti does → slide 2 pipeline / slide 3 architecture;
+(3) 0h + 24h → 168h handled correctly → Module B banner + forecasting and
+uncertainty blocks; (4) feasibility despite data limits → slide 4 matrix;
+(5) what the engineer receives → evidence card (slide 2).

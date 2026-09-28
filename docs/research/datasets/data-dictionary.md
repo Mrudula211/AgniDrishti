@@ -24,6 +24,7 @@ these names in one place and record the mapping below.
 | `spec_min` | float | `unit` | No | — | Lower spec limit (if any) | R3 |
 | `spec_max` | float | `unit` | No | — | Upper spec limit (if any) | R2, R3 |
 | `data_category` | enum | — | Yes | — | `official` / `external` / `synthetic` | CLAUDE.md |
+| `nominal_value` | float | `unit` | No | — | Datasheet typical value (synthetic data sets it; allowed as input) | Synthetic generator |
 | `dataset_version` | string | — | Yes | — | Version / hash of the source file | CLAUDE.md |
 
 \* Required for training/evaluation; may be absent at inference time for
@@ -33,10 +34,11 @@ earlier checkpoints.
 
 | Column | Type | Definition | Status |
 |---|---|---|---|
-| `label_spec_168h` | bool | `value_168h` outside [`spec_min`, `spec_max`] | Proposed proxy (A-06) |
-| `label_safety_slope` | bool | (`value_168h` − `value_0h`)/168 h > Δ_allow/168 h, or `value_168h` beyond the datasheet limit — [ADR-002](../../decisions/ADR-002-safety-slope-and-drift-rate.md) §11 | Proxy label; formula accepted, Δ_allow swept (no default) |
+| `label_spec_168h` | bool | `value_168h` outside [`spec_min`, `spec_max`] | **Secondary** proxy ([ADR-004](../../decisions/ADR-004-primary-proxy-label.md)) |
+| `label_safety_slope` | bool | (`value_168h` − `value_0h`)/168 h > Δ_allow/168 h, or `value_168h` beyond the datasheet limit — [ADR-002](../../decisions/ADR-002-safety-slope-and-drift-rate.md) §11 | **Primary** proxy ([ADR-004](../../decisions/ADR-004-primary-proxy-label.md)); formula accepted, Δ_allow swept (no default) |
 | `label_latent` | bool | Official failure label, if provided | Unknown |
 | `scenario` | string | Synthetic scenario tag | Synthetic data only |
+| Synthetic ground truth | various | `is_anomaly`, `severity`, `severity_band`, `behaviour_family`, `lot_scenario`, `anomaly_amplitude`, `level_offset`, `noise_sd`, `data_fault`, `true_value_*`, `split` — [synthetic-data-design.md](synthetic-data-design.md) §9.8 | Evaluation only: listed in `schema.EVALUATION_ONLY_COLUMNS`, excluded by `model_input_columns` |
 
 ## 3. Derived features (defined here, computed later)
 

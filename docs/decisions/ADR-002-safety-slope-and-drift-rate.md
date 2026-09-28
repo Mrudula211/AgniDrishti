@@ -137,5 +137,9 @@ Still open (not blocking): confirm with organisers how they compute the drift
 rate and safety slope in the hidden evaluation (GAP-01/02/10). If they reply
 with a different definition, supersede this ADR.
 
+Pre-registration 2026-09-26: headline Δ_allow = **0.15 relative** (15 % of |V0|) for both synthetic parameters, the ESCC-style relative drift value seen in S-03; the full §8.1 grid is still reported (`configs/experiments/pipeline_v1.yaml`).
+
+Note 2026-09-26: the team decided not to contact the organisers (ADR-003 amendment), so this definition stands unless official data or text later defines the slope.
+
 Consequences: FR-09, data-dictionary `label_safety_slope`, glossary,
 decision-engine R2/R3 and GAP-01/02 updated on 2026-09-26.

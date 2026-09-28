@@ -52,6 +52,5 @@ proxy, always labelled "internal proxy — not the official Anomaly Detection Sc
 
 ## 6. Unknowns / actions
 
-1. Ask organisers: score formula; label definition; binary vs multi-class
-   output; which module/checkpoint is scored.
+1. ~~Ask organisers~~ — not pursued (team decision 2026-09-26, ADR-003 amendment); our internal metrics and binary mapping stand in.
 2. Re-check the PS entry after 30 Sep 2026 and before later rounds.

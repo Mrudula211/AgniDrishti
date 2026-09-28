@@ -6,7 +6,7 @@ Status: Draft · Last updated: 2026-09-26
 
 - Detection/decision metrics: per component per checkpoint (T24, T96, T168 reported separately).
 - Prediction metrics: per component, target `value_168h`.
-- Positive class: proxy latent-defect label (A-06) — which label is used is stated in every result.
+- Positive class: **primary `label_safety_slope`**, secondary `label_spec_168h`, and (synthetic only, separately) scenario truth — [ADR-004](../../decisions/ADR-004-primary-proxy-label.md). The label and the Δ_allow value are stated with every result.
 
 ## 2. Splits and leakage control
 
@@ -57,6 +57,10 @@ Calibration (reliability diagram / ECE) only if a probability output is produced
 | Review rate | REVIEW / all components |
 | Automatically cleared % | PASS / all components |
 | Latency | Wall-clock time per lot on a stated machine (P2 onward) |
+
+## 3.5 Operating point
+
+Per [ADR-005](../../decisions/ADR-005-operating-point.md): pre-registered target recall R* on the primary label, thresholds selected on validation lots only (lowest review rate reaching R*), full recall–review-rate curve always reported, no retuning on test lots.
 
 ## 4. Uncertainty in the metrics
 

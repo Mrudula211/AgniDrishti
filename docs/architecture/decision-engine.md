@@ -2,16 +2,16 @@
 
 Status: Proposed · Last updated: 2026-09-26
 
-Layer L6: risk fusion and PASS / REVIEW / REJECT.
+Layer L6: ordered decision rules and PASS / REVIEW / REJECT (+ binary flag). No fused risk score (ADR-001 Revision 1).
 
 | Item | Content |
 |---|---|
 | Purpose | Turn evidence from L0–L5 into an operational decision that is biased against escapes and routes uncertainty to humans (PSR-04, PSR-05) |
-| Inputs | L0 flags; L1 spec status/margin; L2 z-scores; L3 features; L4 prediction; L5 interval; config thresholds |
-| Outputs | `decision`, `fired_rules` (ordered list), `evidence` (dict of the numbers used) |
+| Inputs | L0 flags; L1 spec status/margin; L2 z-scores and drift features; L4 prediction; L5 interval; config thresholds |
+| Outputs | `decision`, `binary_flag` (FR-16; REVIEW mapping configurable), `fired_rules` (ordered list), `evidence` (dict of the numbers used) |
 | Assumptions | A-10 (REVIEW is handled by a human); A-11 (early REJECT is meaningful) |
-| Candidate methods | **D1** ordered, documented rule set (below). **D2 (conditional)** cost-sensitive threshold on a single fused score, thresholds chosen on validation lots |
-| Alternatives | Learned classifier producing a "risk probability" — rejected until real labels exist (M-08); weighted CRI sum — only as a ranking aid, not as a probability |
+| Candidate methods | **D1** ordered, documented rule set (below), thresholds chosen on validation lots. ~~D2 fused-score threshold~~ — dropped by ADR-001 Revision 1 |
+| Alternatives | Learned classifier producing a "risk probability" — rejected until real labels exist (M-08); weighted CRI / fused score — **rejected as a decision input** (ADR-001 Rev. 1); at most a ranking aid, never a probability |
 | Risks | Thresholds tuned to synthetic generator; review flood; rule interactions hard to reason about |
 | Validation | Unit test for every rule and for rule order; E6 recall-vs-review-rate curve on held-out lots |
 | Expected evidence | Escape rate and review rate at chosen operating point vs E5. TBD — experiment not yet executed |
@@ -46,10 +46,9 @@ Notes:
 
 ## 2. Operating point
 
-Thresholds are chosen on **validation lots** to meet a target recall (or escape
-rate), then the resulting review rate is reported. Because acceptable review
-rate is unknown (U-13), we report the full recall–review-rate curve and one or
-two operating points, not a single tuned number.
+Policy: [ADR-005](../decisions/ADR-005-operating-point.md) (accepted). Thresholds are chosen on **validation lots** to meet a pre-registered target recall R*
+(REVIEW counted as flagged), then the resulting review rate is reported. Because acceptable review
+rate is unknown (U-13), we always report the full recall–review-rate curve next to the selected point.
 
 ## 3. Things the decision engine must never do
 
