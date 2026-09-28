@@ -22,6 +22,19 @@ From the full system (step 6), remove one layer at a time: −L2 level, −L2 dr
 −L4, −L5, −R4 (joint-extreme reject rule). Shows interactions the
 cumulative order can hide.
 
+**−L4/−L5 recorded 2026-09-28** (development result, validation lots only, SYNTHETIC; the test split is spent).
+This is the decision path for a parameter without a fitted forecast (ADR-007, FR-24), so every site fit now reports it.
+Run: `artifacts/models/pipeline/20260928-134603_4c2bad5/fit_metrics.json` (`no_forecast_validation`), same data and
+thresholds as the E6 development run.
+
+| Configuration (validation, 55 positives) | Recall | Precision | FPR | Escape rate | Review rate | False rejection |
+|---|---|---|---|---|---|---|
+| E6 full rules | 0.782 | 0.090 | 0.195 | 0.218 | 0.200 | 0.0072 |
+| E6 − L4 − L5 (no forecast) | 0.782 | 0.090 | 0.195 | 0.218 | 0.203 | 0.0068 |
+
+Consistent with F3/F4: on this data the forecast adds no detection; removing it moves a few rows between REVIEW and
+REJECT. Remaining leave-one-out variants (−L2 level, −L2 drift, −R4): TBD — experiment not yet executed.
+
 ## 3. Result table — v1 (recorded runs)
 
 Data category: **synthetic** (development v1, DS-04) · Checkpoint: T24 · Label:

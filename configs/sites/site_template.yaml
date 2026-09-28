@@ -1,0 +1,48 @@
+# Site configuration TEMPLATE (ADR-007). Copy to configs/sites/<your-site>.yaml and fill in.
+# Every value below is a placeholder showing the syntax, not a recommended or measured value.
+# Full reference: docs/architecture/data-ingestion.md
+
+site: my-site
+
+input:
+  # row_per_parameter   : one row per component and parameter, a column per checkpoint (value_0h, value_24h, …)
+  # row_per_measurement : one row per reading (component, lot, parameter, hour, value)
+  # row_per_component   : one row per component, a column per parameter and checkpoint (Iddq_0h, Iddq_24h, …)
+  layout: row_per_measurement
+  columns:                  # canonical role -> column name in YOUR export (omit roles you do not have)
+    component_id: SerialNo
+    lot_id: LotNo
+    parameter: TestName
+    hour: ReadPoint         # "24", "24h", "T24" all work
+    value: Result
+    unit: Units
+    # spec_min: LSL
+    # spec_max: USL
+    # wafer_id: Wafer
+    # device_family: PartNumber
+  # row_per_parameter only:  hour_columns: {0: Val_T0, 24: Val_T24}
+  # row_per_component only:  measurement_columns: {iddq: {0: IDDQ_0H, 24: IDDQ_24H}}
+  #                          (omit to detect <parameter>_<hour>h columns automatically)
+  hour_tolerance_h: 2       # a reading at 23.5 h counts as the 24 h checkpoint; others are ignored and reported
+  duplicates: review        # review (fail-safe) | first | last | mean — how repeated readings are handled
+
+parameters:                 # every parameter you screen; names not listed still get lot-relative screening
+  ileak:
+    aliases: [I_LEAK, Leakage]
+    unit: nA                # readings in pA/uA/A are converted; unconvertible units go to REVIEW
+    spec_max: 50            # datasheet limit in `unit`; omit a side for a one-sided limit
+    direction: up           # needed only to fit the 168 h forecast (Module B)
+  # vth:
+  #   unit: V
+  #   no_limit: true        # engineering declaration: no datasheet limit applies
+
+limits:
+  sources: [manual, file, table, registry]   # precedence; remove sources you do not use
+  # table: configs/sites/my-site-limits.csv  # parameter,spec_min,spec_max[,device_family,unit] — e.g. a PLM export
+
+calibration:
+  methods_from: configs/experiments/pipeline_v1.yaml
+  allowance: {kind: relative, value: 0.15}
+  splits:
+    fractions: {train: 0.60, calibration: 0.20, validation: 0.20}
+    seed: 1

@@ -7,6 +7,7 @@ modified afterwards except for the append-only engineer-override log.
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import io
 import json
@@ -22,18 +23,11 @@ import pandas as pd
 
 from agnidrish.decision import PASS, REJECT, REVIEW
 from agnidrish.explain import RULE_TEXT, explain_row
+from agnidrish.ingest import InputProfile, IngestReport, normalize
 from agnidrish.pipeline import PipelineSpec, screen
 from agnidrish.report import render_report, trajectory_svg
-from agnidrish.schema import (
-    DATA_CATEGORIES,
-    EVALUATION_ONLY_COLUMNS,
-    VALUE_COLUMNS,
-    Checkpoint,
-    SchemaError,
-    available_value_columns,
-    required_columns,
-    to_canonical,
-)
+from agnidrish.schema import VALUE_COLUMNS, Checkpoint, SchemaError, available_value_columns
+from agnidrish.site import SiteConfig
 
 PIPELINE_FORMAT = "agnidrish-pipeline/1"
 RUN_ID_PATTERN = re.compile(r"^\d{8}-\d{6}_[0-9A-Za-z]+(?:_\d+)?$")
@@ -81,72 +75,77 @@ def load_pipeline(path: Path) -> LoadedPipeline:
     return LoadedPipeline(PipelineSpec.from_dict(spec_dict), meta, hashlib.sha256(raw).hexdigest(), doc)
 
 
-def read_csv_bytes(data: bytes) -> pd.DataFrame:
-    """Parse an uploaded CSV. Identifiers stay strings so '007' is not turned into 7."""
+def decode_text(data: bytes) -> str:
+    """UTF-8 (with or without byte-order mark), else Latin-1, which many tester exports use."""
     try:
-        table = pd.read_csv(io.BytesIO(data), dtype={c: str for c in ("component_id", "lot_id", "wafer_id", "parameter", "unit")})
-    except (pd.errors.ParserError, pd.errors.EmptyDataError, UnicodeDecodeError) as err:
-        raise SchemaError(f"input is not a readable CSV: {err}") from err
+        return data.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        return data.decode("latin-1")
+
+
+def read_csv_bytes(data: bytes) -> pd.DataFrame:
+    """Parse a delimited text export (comma, semicolon, tab or pipe; detected). Every cell is read as text.
+
+    Text keeps identifiers such as '007' intact; the ingest layer converts measurements to numbers.
+    """
+    text = decode_text(data)
+    try:
+        sep = csv.Sniffer().sniff(text[:65536], delimiters=",;\t|").delimiter
+    except csv.Error:
+        sep = ","
+    try:
+        table = pd.read_csv(io.StringIO(text), sep=sep, dtype=str, skipinitialspace=True)
+    except (pd.errors.ParserError, pd.errors.EmptyDataError) as err:
+        raise SchemaError(f"input is not a readable delimited text file: {err}") from err
     if table.empty:
-        raise SchemaError("input CSV has no rows")
+        raise SchemaError("input file has no data rows")
+    table.columns = [str(c).strip() for c in table.columns]
     return table
 
 
 def prepare_input(
     raw: pd.DataFrame,
     pipeline: LoadedPipeline,
+    site: SiteConfig,
     category: str,
     *,
-    mapping: dict[str, str] | None = None,
+    profile: InputProfile | None = None,
     version: str = "unversioned",
-) -> tuple[pd.DataFrame, list[str]]:
-    """Canonical table safe to screen at the pipeline's checkpoint, plus human-readable warnings.
+) -> tuple[pd.DataFrame, list[str], IngestReport]:
+    """Raw export -> canonical table safe to screen at the pipeline's checkpoint, warnings, ingest report.
 
-    Later checkpoints and evaluation-only columns are removed before screening,
-    so an upload that happens to contain value_168h cannot influence a 24 h decision.
+    ``profile`` overrides the site's input profile for this upload. Later checkpoints are
+    removed before screening, so an export that also contains 168 h readings cannot
+    influence a 24 h decision; evaluation-only columns never enter.
 
     Raises:
-        SchemaError: unknown category, unmappable input, missing required column,
-            or a data_category column that disagrees with ``category``.
+        SchemaError: unknown category, an export the profile cannot map, or a data_category
+            column that disagrees with ``category``.
     """
-    if category not in DATA_CATEGORIES:
-        raise SchemaError(f"category must be one of {sorted(DATA_CATEGORIES)}, got {category!r}")
+    if "data_category" in raw.columns:
+        found = sorted(set(raw["data_category"].dropna().astype(str)))
+        if found and found != [category]:
+            raise SchemaError(f"category {category!r} disagrees with the file's data_category {found}")
+    profile = profile or InputProfile.from_dict(site.input)
+    table, report = normalize(raw, profile, site, data_category=category, dataset_version=version)
     checkpoint = Checkpoint[pipeline.spec.checkpoint]
-    warnings: list[str] = []
-    if mapping:
-        table = to_canonical(raw, mapping, checkpoint=checkpoint, data_category=category, dataset_version=version)
-    else:
-        table = raw.copy()
-        if "data_category" in table.columns:
-            found = sorted(set(table["data_category"].dropna().astype(str)))
-            if found != [category]:
-                raise SchemaError(f"category {category!r} disagrees with the file's data_category {found}")
-        else:
-            table["data_category"] = category
-        if "dataset_version" not in table.columns:
-            table["dataset_version"] = version
-        missing = [c for c in required_columns(checkpoint) if c not in table.columns]
-        if missing:
-            found = [str(c) for c in raw.columns[:8]]
-            raise SchemaError(
-                f"columns required at {checkpoint.name} are missing: {missing}. The file's first columns are {found}. "
-                "Expected a burn-in lot table: one row per component per parameter with its lot and the 0 h and 24 h "
-                "measurements (a header row is required), or a server-side column mapping for the tester's own format."
-            )
+    warnings = list(report.warnings)
 
     later = [c for c in VALUE_COLUMNS.values() if c not in available_value_columns(checkpoint) and c in table.columns]
-    hidden = sorted(c for c in table.columns if c in EVALUATION_ONLY_COLUMNS)
-    if later or hidden:
-        warnings.append(f"ignored columns not available at {checkpoint.name} or evaluation-only: {later + hidden}")
-    table = table.drop(columns=later + hidden).reset_index(drop=True)
+    with_data = [c for c in later if table[c].notna().any()]
+    if with_data:
+        warnings.append(f"readings after {checkpoint.name} were ignored for this decision: {with_data}")
+    table = table.drop(columns=later)
 
-    unknown = sorted(set(table["parameter"].dropna()) - set(pipeline.spec.predictors))
-    if pipeline.spec.predictors and unknown:
+    no_model = sorted(set(table["parameter"].dropna()) - set(pipeline.spec.predictors))
+    if pipeline.spec.decision.use_prediction and no_model:
         warnings.append(
-            f"parameters {unknown} are not calibrated in this pipeline — their rows go to REVIEW (R0, missing evidence); "
-            "fit a site pipeline that includes them (scripts/fit_pipeline.py)"
+            f"no validated 168 h forecasting model for {no_model} in this pipeline: screened with the quality gate, "
+            "datasheet limit and lot-relative rules only (fit a site pipeline on historical lots to add a forecast)"
         )
-    return table, warnings
+    if report.unregistered_parameters:
+        warnings.append(f"parameters not in the site registry (unit and limits taken from the file only): {report.unregistered_parameters}")
+    return table, warnings, report
 
 
 def screen_table(table: pd.DataFrame, pipeline: LoadedPipeline) -> pd.DataFrame:
@@ -198,13 +197,17 @@ def record_run(
     warnings: list[str],
     commit: str,
     elapsed_ms: float,
-    mapping: dict[str, str] | None = None,
+    site: SiteConfig,
+    profile: InputProfile,
+    ingest: IngestReport,
     version: str = "unversioned",
 ) -> Path:
-    """Write the run directory (FR-12, NFR-04): input copy, pipeline copy, decisions, lot summary, report, audit."""
+    """Write the run directory (FR-12, NFR-04): input, pipeline and site-config copies, decisions,
+    lot summary, report and audit record — enough to recompute every decision offline."""
     run = _new_run_dir(root, commit)
     (run / "input.csv").write_bytes(input_bytes)
     (run / "pipeline.json").write_text(json.dumps(pipeline.document, indent=2), encoding="utf-8")
+    (run / "site.json").write_text(json.dumps(site.to_dict(), indent=2, default=str), encoding="utf-8")
     result.to_csv(run / "decisions.csv", index=False)
     lot_summary(result).to_csv(run / "lot_summary.csv", index=False)
     note = f"Checkpoint {pipeline.spec.checkpoint}; pipeline sha256 {pipeline.sha256[:12]}; input {source_name}; run {run.name}."
@@ -223,7 +226,9 @@ def record_run(
         "pipeline_meta": pipeline.meta,
         "checkpoint": pipeline.spec.checkpoint,
         "data_category": category,
-        "mapping": mapping,
+        "site": site.name,
+        "input_profile": profile.to_dict(),
+        "ingest": ingest.to_dict(),
         "dataset_version": version,
         "code_version": commit,
         "rows": int(len(result)),
@@ -251,8 +256,12 @@ def list_runs(root: Path, limit: int = 50) -> list[dict[str, Any]]:
 
 
 def load_decisions(run: Path) -> pd.DataFrame:
-    table = pd.read_csv(run / "decisions.csv", dtype={c: str for c in ("component_id", "lot_id", "wafer_id", "parameter", "unit", "gate_codes", "fired_rules")})
-    table["gate_codes"] = table["gate_codes"].fillna("")
+    text_columns = ("component_id", "lot_id", "wafer_id", "device_family", "parameter", "unit", "gate_codes", "fired_rules",
+                    "forecast_status", "spec_source", "ingest_flags")
+    table = pd.read_csv(run / "decisions.csv", dtype={c: str for c in text_columns})
+    for c in ("gate_codes", "ingest_flags"):
+        if c in table.columns:
+            table[c] = table[c].fillna("")
     return table
 
 
@@ -307,9 +316,10 @@ def replay(run: Path) -> bool:
     """NFR-04: re-screen the stored input with the stored pipeline; True if every decision is identical."""
     audit = json.loads((run / "audit.json").read_text(encoding="utf-8"))
     pipeline = load_pipeline(run / "pipeline.json")
+    site = SiteConfig.from_dict(json.loads((run / "site.json").read_text(encoding="utf-8")))
     raw = read_csv_bytes((run / "input.csv").read_bytes())
-    table, _ = prepare_input(raw, pipeline, audit["data_category"], mapping=audit.get("mapping"),
-                             version=audit.get("dataset_version", "unversioned"))
+    table, _, _ = prepare_input(raw, pipeline, site, audit["data_category"], profile=InputProfile.from_dict(audit["input_profile"]),
+                                version=audit.get("dataset_version", "unversioned"))
     again = screen_table(table, pipeline)
     recorded = load_decisions(run)
     return again["decision"].tolist() == recorded["decision"].tolist() and again["fired_rules"].tolist() == recorded["fired_rules"].tolist()

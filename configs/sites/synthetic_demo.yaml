@@ -1,0 +1,34 @@
+# Site configuration (ADR-007): everything that differs between organisations lives here.
+# This one describes the SYNTHETIC demo "site" (development v1 generator). Nothing here is an
+# ISRO value. A new organisation copies configs/sites/site_template.yaml and fills it in.
+
+site: synthetic-demo
+
+input:                      # how the tester export is laid out (agnidrish.ingest)
+  layout: row_per_parameter # one row per component and parameter, one column per checkpoint
+  # columns: {}             # canonical names are used directly, so no mapping is needed
+  hour_tolerance_h: 2
+  duplicates: review
+
+parameters:                 # registry: canonical name -> unit, limits, degradation direction, tester aliases
+  iddq:
+    aliases: [IDDQ, I_DDQ]
+    unit: uA
+    spec_max: 30.0
+    direction: up
+  tpd:
+    aliases: [TPD, t_pd]
+    unit: ns
+    spec_min: 3.8
+    spec_max: 7.0
+    direction: up
+
+limits:
+  sources: [manual, file, table, registry]   # first source that has a limit for a row wins; provenance is recorded
+
+calibration:                # used only by scripts/fit_pipeline.py
+  methods_from: configs/experiments/pipeline_v1.yaml   # pre-registered methods; never redefined per site
+  allowance: {kind: relative, value: 0.15}             # Δ_allow (ADR-002) — a site reliability decision [PR]
+  splits:                   # used only when the historical data has no `split` column
+    fractions: {train: 0.60, calibration: 0.20, validation: 0.20}
+    seed: 20260926

@@ -1,7 +1,7 @@
 """Start the AgniDrishti screening service natively (no Docker), on Windows or Linux.
 
-    python scripts/serve.py --pipeline artifacts/models/pipeline/<run>/pipeline.json
-    python scripts/serve.py --pipeline latest --host 0.0.0.0 --port 8000 --runs-dir D:/agni/runs
+    python scripts/serve.py --site configs/sites/<site>.yaml --pipeline artifacts/models/pipeline/<run>/pipeline.json
+    python scripts/serve.py --site configs/sites/synthetic_demo.yaml --pipeline latest --host 0.0.0.0 --runs-dir D:/agni/runs
 
 ``--pipeline latest`` picks the newest fitted pipeline under artifacts/models/pipeline/ (demo
 convenience; a production install should name the file explicitly). Settings are passed to
@@ -36,17 +36,21 @@ def resolve_pipeline(value: str) -> Path:
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--site", required=True, help="site config, e.g. configs/sites/synthetic_demo.yaml")
     ap.add_argument("--pipeline", required=True, help="pipeline.json path, or 'latest'")
     ap.add_argument("--host", default="127.0.0.1", help="0.0.0.0 to accept connections from other machines")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--runs-dir", help="where runs are recorded (default artifacts/screening)")
-    ap.add_argument("--mapping", help="YAML raw->canonical column mapping for the tester export")
     ap.add_argument("--max-upload-mb", type=float)
     args = ap.parse_args()
 
     pipeline = resolve_pipeline(args.pipeline)
+    site = Path(args.site) if Path(args.site).is_absolute() else REPO_ROOT / args.site
+    if not site.is_file():
+        raise SystemExit(f"site config not found: {site}")
     os.environ["AGNIDRISH_PIPELINE"] = str(pipeline)
-    for flag, var in ((args.runs_dir, "AGNIDRISH_RUNS_DIR"), (args.mapping, "AGNIDRISH_MAPPING"), (args.max_upload_mb, "AGNIDRISH_MAX_UPLOAD_MB")):
+    os.environ["AGNIDRISH_SITE"] = str(site)
+    for flag, var in ((args.runs_dir, "AGNIDRISH_RUNS_DIR"), (args.max_upload_mb, "AGNIDRISH_MAX_UPLOAD_MB")):
         if flag is not None:
             os.environ[var] = str(flag)
     for p in (REPO_ROOT, REPO_ROOT / "src"):  # works from a checkout without `pip install -e .`

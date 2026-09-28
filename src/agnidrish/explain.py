@@ -20,6 +20,14 @@ RULE_TEXT: dict[str, str] = {
     "R5": "level or drift is unusual relative to the lot",
     "R6": "no rule fired",
 }
+LIMIT_SOURCE_TEXT: dict[str, str] = {
+    "file": "measurement file",
+    "manual": "entered by an engineer for this upload",
+    "table": "site limits table",
+    "registry": "site parameter registry",
+    "declared_none": "none — the site registry declares that no datasheet limit applies",
+    "none": "none found in any configured source (row sent to REVIEW)",
+}
 
 
 def _num(x: Any, digits: int = 4) -> str:
@@ -55,6 +63,12 @@ def explain_row(row: pd.Series, coverage: float | None, data_category: str) -> d
                 f"{cov}prediction interval (target marginal coverage, not a failure probability): "
                 f"[{_num(row['pi_low'])}, {_num(row['pi_high'])}] {unit}"
             )
+    status = row.get("forecast_status")
+    if isinstance(status, str) and status != "applied":
+        lines.append(f"168 h forecast (Module B): {status} — decided by the datasheet and lot-relative rules only")
+    source = row.get("spec_source")
+    if isinstance(source, str):
+        lines.append("Limit source: " + LIMIT_SOURCE_TEXT.get(source, source))
     if row.get("gate_codes"):
         lines.append(f"Quality flags: {row['gate_codes']}")
     lines.append("Rules fired: " + "; ".join(f"{r} — {RULE_TEXT.get(r, r)}" for r in rules))

@@ -1,6 +1,6 @@
 # Data Dictionary (canonical schema — provisional)
 
-Status: Draft · Last updated: 2026-09-26
+Status: Draft · Last updated: 2026-09-28
 
 This is the **target internal schema**, designed from R2 §H and R3 §9. It is not
 the official PS schema (unknown). When real data arrives, map its columns to
@@ -62,8 +62,21 @@ earlier checkpoints.
 | v168 | ✘ | ✘ | ✔ (target / final screening only) |
 | Labels | ✘ | ✘ | ✘ (evaluation only) |
 
-## 5. Raw → canonical mapping log
+## 5. Raw → canonical mapping
 
-| Dataset | Raw column | Canonical column | Transformation |
-|---|---|---|---|
-| — | TBD — no dataset inspected yet | — | — |
+Raw exports are mapped by a site input profile, not by code ([data-ingestion.md](../../architecture/data-ingestion.md),
+ADR-007). The mapping used for every screening run is stored in that run's `audit.json` (`input_profile`) together
+with the site config (`site.json`).
+
+Columns added by the ingest layer (outputs, never raw inputs):
+
+| Column | Meaning |
+|---|---|
+| `spec_source` | where the row's limits came from: `file`, `manual`, `table`, `registry`, `declared_none`, `none` |
+| `ingest_flags` | `;`-joined codes for unusable readings (`DUPLICATE_MEASUREMENT`, `UNIT_NOT_CONVERTIBLE`, `MIXED_UNITS`, `NON_NUMERIC`); any code → REVIEW |
+| `forecast_status` | (screening output) whether Module B was applied to the row's parameter |
+
+| Dataset | Profile | Notes |
+|---|---|---|
+| DS-04 synthetic development v1 | `configs/sites/synthetic_demo.yaml` (`row_per_parameter`, canonical names) | no renaming needed |
+| Official / real site data | TBD — no dataset inspected yet | — |

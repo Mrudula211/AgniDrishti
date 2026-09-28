@@ -38,6 +38,10 @@ class FlagCode(StrEnum):
     LOT_TOO_SMALL = "LOT_TOO_SMALL"
     LOW_LEVEL_DISPERSION = "LOW_LEVEL_DISPERSION"
     LOW_DRIFT_DISPERSION = "LOW_DRIFT_DISPERSION"
+    # Raised by the ingest layer (agnidrish.ingest.IngestFlag) and carried in the ``ingest_flags`` column.
+    DUPLICATE_MEASUREMENT = "DUPLICATE_MEASUREMENT"
+    UNIT_NOT_CONVERTIBLE = "UNIT_NOT_CONVERTIBLE"
+    MIXED_UNITS = "MIXED_UNITS"
 
 
 @dataclass(frozen=True)
@@ -126,8 +130,15 @@ def run_quality_gate(table: pd.DataFrame, checkpoint: Checkpoint, config: Qualit
         flag_rows(non_finite, FlagCode.NON_FINITE, col)
         numeric[col] = values.where(~non_finite)
 
+    if "ingest_flags" in table.columns:
+        carried = table["ingest_flags"].fillna("").astype(str)
+        for code in sorted({c for v in carried for c in v.split(";") if c}):
+            flag_rows(carried.str.split(";").apply(lambda cs, code=code: code in cs), FlagCode(code), "raised while normalising the input")
+
     spec_min, spec_max = numeric["spec_min"], numeric["spec_max"]
-    flag_rows(table["spec_min"].isna() & table["spec_max"].isna(), FlagCode.NO_SPEC_LIMIT, "spec_min and spec_max")
+    # A parameter the site registry declares as having no datasheet limit is not a missing limit.
+    declared_none = table["spec_source"].eq("declared_none") if "spec_source" in table.columns else pd.Series(False, index=table.index)
+    flag_rows(table["spec_min"].isna() & table["spec_max"].isna() & ~declared_none, FlagCode.NO_SPEC_LIMIT, "spec_min and spec_max")
     flag_rows(spec_min > spec_max, FlagCode.INVALID_SPEC_LIMITS, "spec_min > spec_max")
 
     for parameter, (low, high) in config.physical_bounds.items():
@@ -144,6 +155,11 @@ def run_quality_gate(table: pd.DataFrame, checkpoint: Checkpoint, config: Qualit
     valid[GROUP_KEYS] = table.loc[~invalid, GROUP_KEYS]
     for (lot_id, parameter), group in valid.groupby(GROUP_KEYS, sort=True):
         records.extend(_lot_flags(lot_id, parameter, group, value_cols, config))
+    usable = table.loc[~invalid].dropna(subset=GROUP_KEYS)  # rows already flagged (e.g. unconvertible unit) do not count
+    units = usable.groupby(GROUP_KEYS, sort=True)["unit"].nunique()
+    for (lot_id, parameter) in units.index[units > 1]:  # values in different units cannot share lot statistics
+        records.append({"level": "lot", "row": pd.NA, "lot_id": lot_id, "parameter": parameter, "component_id": pd.NA,
+                        "code": FlagCode.MIXED_UNITS, "detail": "more than one unit in this lot and parameter"})
 
     return pd.DataFrame.from_records(records, columns=list(FLAG_COLUMNS))
 

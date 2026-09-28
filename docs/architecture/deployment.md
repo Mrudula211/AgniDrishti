@@ -29,24 +29,26 @@ QA inspector ◄── web UI (/)  ·  API description (/docs)  ·  health (/api
 
 ## 2. Input format
 
-One row per component per parameter, canonical columns ([data-dictionary](../research/datasets/data-dictionary.md)):
-`component_id, lot_id, parameter, unit, value_0h, value_24h, spec_min, spec_max` (a missing limit means no
-limit on that side). Optional: `wafer_id, device_family, nominal_value`. A tester export with other column
-names is handled by a YAML raw→canonical mapping (`AGNIDRISH_MAPPING`). Screen **whole lots**: the
-lot-relative statistics use every component of the lot in the file, and lots below 20 components go to REVIEW.
+Any tester export: one row per reading, per component and parameter, or per component. The site
+config (`configs/sites/<site>.yaml`) describes the usual format, parameter registry and where
+specification limits come from; the web UI detects the format of an unseen file and lets the engineer
+confirm the mapping before screening. Full reference: [data-ingestion.md](data-ingestion.md).
+Screen **whole lots**: the lot-relative statistics use every component of the lot in the file, and lots
+below 20 components go to REVIEW.
 
 ## 3. Fit a site pipeline (once per site / product, and after process changes)
 
-1. Collect historical burn-in lots with `value_0h`, `value_24h` **and** `value_168h`
-   measured, all parameters that will be screened.
-2. Copy `configs/deployment/fit_synthetic_demo.yaml` and set `label.directions` for every parameter
-   (`up` or `down`) and the drift allowance Δ_allow (a reliability decision for the site, ADR-002).
+1. Collect historical burn-in lots with 0 h, 24 h **and** 168 h readings, in the site's export format.
+2. In the site config, give every parameter that should get a 168 h forecast a `direction` (`up`/`down`),
+   and set `calibration.allowance` Δ_allow (a reliability decision for the site, ADR-002). Parameters without a
+   direction are screened without a forecast.
 3. Run:
    ```
-   python scripts/fit_pipeline.py --input history.csv --category official --config configs/deployment/<site>.yaml
+   python scripts/fit_pipeline.py --input history.csv --category official --site configs/sites/<site>.yaml
    ```
    Output: `artifacts/models/pipeline/<run>/pipeline.json`, `fit_metrics.json`, `fit_summary.md`
-   (Module B MAE per predictor, interval coverage, operating point, validation recall and review rate).
+   (Module B MAE per predictor, interval coverage, operating point, validation recall and review rate, and the
+   same rules without the forecast).
 
 ## 4. Before relying on a site pipeline
 
@@ -62,7 +64,7 @@ Native install. No Docker is needed; the same commands work on Windows and Linux
 python -m venv .venv
 .venv\Scripts\activate            # Linux: source .venv/bin/activate
 pip install -e ".[serve]"
-python scripts/serve.py --pipeline artifacts/models/pipeline/<run>/pipeline.json --host 0.0.0.0 --port 8000 --runs-dir <backed-up dir>
+python scripts/serve.py --site configs/sites/<site>.yaml --pipeline artifacts/models/pipeline/<run>/pipeline.json --host 0.0.0.0 --port 8000 --runs-dir <backed-up dir>
 ```
 Open `http://<host>:8000/`. Use `--host 127.0.0.1` (default) for a single workstation, and `0.0.0.0` to
 serve the line's network (allow the port in the host firewall). `--pipeline latest` picks the newest
@@ -71,10 +73,10 @@ fitted pipeline, which is convenient for demos; name the file explicitly in prod
 Keep it running after logout or reboot:
 
 - **Windows:** Task Scheduler → *Create Task* → trigger *At startup*, "Run whether user is logged on or not";
-  action: program `<repo>\.venv\Scripts\python.exe`, arguments `scripts\serve.py --pipeline <file> --host 0.0.0.0`,
+  action: program `<repo>\.venv\Scripts\python.exe`, arguments `scripts\serve.py --site <site.yaml> --pipeline <file> --host 0.0.0.0`,
   start in `<repo>`. A service wrapper (e.g. NSSM) works the same way.
 - **Linux (systemd):** a unit with `WorkingDirectory=<repo>`,
-  `ExecStart=<repo>/.venv/bin/python scripts/serve.py --pipeline <file> --host 0.0.0.0 --runs-dir /var/lib/agnidrishti/runs`,
+  `ExecStart=<repo>/.venv/bin/python scripts/serve.py --site <site.yaml> --pipeline <file> --host 0.0.0.0 --runs-dir /var/lib/agnidrishti/runs`,
   `Restart=on-failure`, run as a dedicated non-root user.
 
 `scripts/serve.py` sets the variables below; they can also be set directly when running
@@ -84,7 +86,7 @@ Keep it running after logout or reboot:
 |---|---|---|
 | `AGNIDRISH_PIPELINE` | — (required) | Frozen pipeline JSON; the service refuses to start without it |
 | `AGNIDRISH_RUNS_DIR` | `artifacts/screening` | Run records (back this directory up; it is the audit trail) |
-| `AGNIDRISH_MAPPING` | none | YAML raw→canonical column mapping for the tester export |
+| `AGNIDRISH_SITE` | — (required) | Site config: input format, parameter registry, limit sources ([data-ingestion.md](data-ingestion.md)) |
 | `AGNIDRISH_MAX_UPLOAD_MB` | 50 | Upload limit (HTTP 413 above it) |
 
 Security: the service has no authentication or TLS. Put it behind the site's reverse proxy /
@@ -98,7 +100,9 @@ single sign-on on the internal network. Run records contain measurement data. Pr
 | Service decisions on the 10 held-out test lots (2,368 rows) vs recorded final run | 2,368 / 2,368 identical decisions and fired rules | in-process API check 2026-09-28 vs `artifacts/metrics/E1-E6_test/20260926-144448_c8ca99b/test_decisions.csv` |
 | Replay of that run | identical | `/api/runs/20260928-094007_d5a1a07/replay` (temporary runs dir) |
 | Screening time for that upload | 554 ms for 2,368 rows / 10 lots, one measurement on the development laptop | `audit.json` `elapsed_ms`; not a benchmark — NFR-07/08: TBD — experiment not yet executed |
-| Automated tests | fit, service and API tests in `tests/` | `python -m pytest` |
+| After the ADR-007 ingest redesign: site-config fit reproduces the recorded E6 pipeline; service reproduces all 2,368 recorded decisions and fired rules; replay identical | all identical | check of 2026-09-28 with `artifacts/models/pipeline/20260928-134603_4c2bad5` |
+| Same held-out lots exported in a different format (one row per reading, other column names, `;` delimiter, text hours) | identical decisions to the canonical upload | `tests/integration/test_api.py::test_foreign_export_is_inspected_mapped_and_screened` |
+| Automated tests | ingest, fit, service and API tests in `tests/` (111) | `python -m pytest` |
 
 Detection performance on synthetic lots is in [ablation-plan.md](../research/experiments/ablation-plan.md) §3–§5
 (recall 0.800 at 10.4 % review on test; R* = 0.95 not reached). Nothing here is evidence about ISRO hardware.
