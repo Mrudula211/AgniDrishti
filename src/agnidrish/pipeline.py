@@ -34,6 +34,12 @@ class PipelineSpec:
     predictors: dict[str, Predictor] = field(default_factory=dict)  # per parameter
     halfwidths: dict[str, float] = field(default_factory=dict)
 
+    def __post_init__(self) -> None:
+        # The safety-slope test and the optimistic/pessimistic interval ends need a signed direction.
+        bad = sorted(p for p, d in self.directions.items() if d not in ("up", "down"))
+        if bad:
+            raise ValueError(f"pipeline directions must be 'up' or 'down'; got {[(p, self.directions[p]) for p in bad]}")
+
     def to_dict(self) -> dict:
         d = asdict(self)
         d["predictors"] = {p: m.to_dict() for p, m in self.predictors.items()}

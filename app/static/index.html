@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AgniDrishti Screening</title>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#16202c;--muted:#5b6675;--line:#d9dee5;--band:#e6ecf5;--accent:#1d4f91;--accent-ink:#fff;
+--pass:#1f7a4d;--review:#a86400;--reject:#b3261e;--pass-bg:#e5f4ec;--review-bg:#fdf1de;--reject-bg:#fbe7e5;--warn-bg:#fff6d6;--warn-line:#e6c65c}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1318;--card:#181e26;--ink:#e6e9ee;--muted:#9aa4b2;--line:#2a323d;--band:#222d3d;--accent:#7fb0ff;--accent-ink:#0f1318;
+--pass:#4cc38a;--review:#f0a53a;--reject:#f2665c;--pass-bg:#15291f;--review-bg:#2d2213;--reject-bg:#301816;--warn-bg:#2b2612;--warn-line:#6b5a1c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 20px;background:var(--card);border-bottom:1px solid var(--line)}
+header h1{font-size:18px;margin:0;letter-spacing:.2px}header h1 span{color:var(--muted);font-weight:400}
+.chip{display:inline-block;padding:2px 9px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--muted);background:var(--bg)}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;padding:16px 20px;max-width:1500px;margin:0 auto}
+@media (max-width:900px){.layout{grid-template-columns:1fr;padding:12px 16px}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.panel h2{font-size:14px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+label{display:block;font-size:12px;color:var(--muted);margin:8px 0 3px}
+select,input[type=text],textarea{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:6px 12px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600;width:100%;padding:9px;margin-top:12px}
+button:disabled{opacity:.5;cursor:not-allowed}
+.drop{border:2px dashed var(--line);border-radius:8px;padding:18px 10px;text-align:center;color:var(--muted);cursor:pointer}
+.drop.over{border-color:var(--accent);color:var(--accent)}.drop b{color:var(--ink);word-break:break-all}
+.runs{list-style:none;margin:0;padding:0;max-height:340px;overflow:auto}
+.runs li{padding:7px 6px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px}.runs li:hover,.runs li.active{background:var(--band)}
+.runs small{display:block;color:var(--muted)}
+.banner{border-radius:8px;padding:8px 12px;font-weight:600;margin-bottom:12px;text-align:center}
+.banner.nonofficial{background:var(--reject);color:#fff}.banner.official{background:var(--pass);color:#fff}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}.tile b{display:block;font-size:26px;line-height:1.2}
+.muted{color:var(--muted)}.PASS{color:var(--pass)}.REVIEW{color:var(--review)}.REJECT{color:var(--reject)}
+.badge{display:inline-block;min-width:64px;text-align:center;padding:1px 8px;border-radius:5px;font-weight:600;font-size:12px}
+.badge.PASS{background:var(--pass-bg)}.badge.REVIEW{background:var(--review-bg)}.badge.REJECT{background:var(--reject-bg)}
+.warn{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:8px;padding:8px 12px;margin-bottom:12px}
+.err{background:var(--reject-bg);border:1px solid var(--reject);border-radius:8px;padding:8px 12px;margin-top:10px;white-space:pre-wrap}
+.scroll{overflow:auto;max-height:520px;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13px;background:var(--card)}
+th,td{padding:6px 9px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{background:var(--band);position:sticky;top:0;z-index:1}td.num{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr.sel{outline:2px solid var(--accent);outline-offset:-2px}tbody tr.click{cursor:pointer}tbody tr.click:hover{background:var(--band)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.toolbar input{max-width:260px}.seg button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.detail{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px}@media (max-width:1100px){.detail{grid-template-columns:1fr}}
+.detail ul{margin:6px 0;padding-left:18px}.detail li{margin:3px 0}
+.tabs{display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.tabs button{border:none;border-bottom:2px solid transparent;border-radius:0;background:none;padding:8px 12px;color:var(--muted)}
+.tabs button.on{border-bottom-color:var(--accent);color:var(--ink);font-weight:600}
+.hidden{display:none}.links a{margin-right:12px;color:var(--accent)}
+svg text{fill:var(--muted);font-size:11px}
+dl.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0}dl.kv dt{color:var(--muted)}dl.kv dd{margin:0}
+code{font-size:12px;background:var(--band);padding:1px 5px;border-radius:4px}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>AgniDrishti <span>· burn-in screening (PS 26170)</span></h1>
+  <span class="chip" id="hdr-checkpoint">loading pipeline…</span>
+  <span class="chip" id="hdr-pipeline"></span>
+  <span class="chip" id="hdr-fit"></span>
+</header>
+
+<div class="layout">
+  <aside>
+    <section class="panel">
+      <h2>New screening</h2>
+      <div class="drop" id="drop" tabindex="0">Drop a lot CSV here<br>or click to choose<br><b id="fname"></b></div>
+      <input type="file" id="file" accept=".csv,text/csv" class="hidden">
+      <label for="category">Data category (shown on every output)</label>
+      <select id="category">
+        <option value="">— select —</option>
+        <option value="official">official</option>
+        <option value="external">external</option>
+        <option value="synthetic">synthetic</option>
+      </select>
+      <label for="version">Dataset version label</label>
+      <input type="text" id="version" value="unversioned">
+      <button class="primary" id="run" disabled>Screen lot</button>
+      <div id="upload-err" class="err hidden"></div>
+      <p class="muted" style="font-size:12px;margin:10px 0 0">Needs <code>component_id, lot_id, parameter, unit, value_0h, value_24h, spec_min, spec_max</code>. Later checkpoints in the file are ignored for the 24 h decision.</p>
+    </section>
+    <section class="panel">
+      <h2>Recorded runs</h2>
+      <ul class="runs" id="runs"><li class="muted">none yet</li></ul>
+    </section>
+  </aside>
+
+  <main>
+    <div class="tabs">
+      <button class="on" data-tab="results">Results</button>
+      <button data-tab="method">Method &amp; pipeline</button>
+    </div>
+
+    <section id="tab-results">
+      <div id="no-run" class="panel empty">Upload a lot file, or open a recorded run.</div>
+      <div id="run-view" class="hidden">
+        <div id="banner" class="banner"></div>
+        <div class="panel">
+          <dl class="kv" id="run-meta"></dl>
+          <p class="links" style="margin:10px 0 0" id="run-links"></p>
+        </div>
+        <div id="warnings"></div>
+        <div class="tiles" id="tiles"></div>
+
+        <section class="panel">
+          <h2>Lots</h2>
+          <div class="scroll" style="max-height:260px"><table id="lots"></table></div>
+        </section>
+
+        <section class="panel">
+          <h2>Components</h2>
+          <div class="toolbar">
+            <span class="seg" id="filter">
+              <button data-f="flagged" class="on">Flagged</button><button data-f="REJECT">REJECT</button><button data-f="REVIEW">REVIEW</button><button data-f="PASS">PASS</button><button data-f="all">All</button>
+            </span>
+            <input type="text" id="search" placeholder="Search component / lot / parameter">
+            <span class="muted" id="count"></span>
+          </div>
+          <div class="scroll"><table id="rows"></table></div>
+        </section>
+
+        <section class="panel hidden" id="detail-panel">
+          <h2>Evidence card</h2>
+          <div class="detail">
+            <div>
+              <h3 id="d-head" style="margin:0 0 6px;font-size:16px"></h3>
+              <ul id="d-lines"></ul>
+              <div id="d-overrides"></div>
+              <form id="ov-form" style="margin-top:12px">
+                <h3 style="font-size:14px;margin:0">Engineer decision (recorded next to the pipeline decision, which is never changed)</h3>
+                <div style="display:grid;grid-template-columns:140px 1fr;gap:8px">
+                  <div><label for="ov-dec">Decision</label><select id="ov-dec"><option>PASS</option><option>REVIEW</option><option>REJECT</option></select></div>
+                  <div><label for="ov-eng">Engineer</label><input type="text" id="ov-eng" maxlength="120" required></div>
+                </div>
+                <label for="ov-reason">Reason</label><textarea id="ov-reason" rows="2" maxlength="2000" required></textarea>
+                <button type="submit" style="margin-top:8px">Record engineer decision</button>
+                <span id="ov-msg" class="muted"></span>
+              </form>
+            </div>
+            <div id="d-chart"></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="tab-method" class="hidden">
+      <div class="panel" id="method"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = (v, d = 4) => {
+  if (v === null || v === undefined || Number.isNaN(Number(v))) return "—";
+  const t = Number(v).toPrecision(d);
+  return t.includes(".") ? t.replace(/\.?0+(?=e|$)/, "") : t;  // trim zeros only after a decimal point
+};
+const DEC = ["PASS", "REVIEW", "REJECT"];
+let state = { file: null, run: null, filter: "flagged", query: "", selected: null, pipeline: null };
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, opts);
+  const text = await r.text();
+  let body; try { body = JSON.parse(text); } catch { body = text; }
+  if (!r.ok) throw new Error((body && body.detail) ? (typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail)) : `HTTP ${r.status}`);
+  return body;
+}
+
+// ---- pipeline / method ----
+async function loadPipeline() {
+  const p = await api("/api/pipeline");
+  state.pipeline = p;
+  const m = p.meta || {};
+  $("hdr-checkpoint").textContent = `decision at ${p.spec.checkpoint.replace("T", "")} h`;
+  $("hdr-pipeline").textContent = `pipeline ${p.sha256.slice(0, 12)}`;
+  $("hdr-fit").textContent = m.data_category ? `fitted on ${m.data_category.toUpperCase()} data` : "fit metadata: none";
+  const s = p.spec, d = s.decision;
+  const preds = Object.entries(s.predictors).map(([par, pr]) =>
+    `<tr><td>${esc(par)}</td><td>${esc(s.directions[par] || "—")}</td><td>${esc(pr.name)}</td><td class="num">${num(s.halfwidths[par])}</td></tr>`).join("");
+  const rules = Object.entries(p.rules).map(([r, t]) => `<tr><td><b>${esc(r)}</b></td><td>${esc(t)}</td></tr>`).join("");
+  $("method").innerHTML = `
+    <h2>How a decision is made</h2>
+    <p>Rules are checked in order; the first rule that matches sets the decision and every matching rule is listed on the evidence card. There is no fused score. Missing or invalid inputs never PASS.</p>
+    <div class="scroll" style="max-height:none"><table><tr><th>Rule</th><th>Meaning</th></tr>${rules}</table></div>
+    <h2 style="margin-top:18px">Frozen settings</h2>
+    <dl class="kv">
+      <dt>Decision checkpoint</dt><dd>${esc(s.checkpoint)} (uses value_0h and value_24h only)</dd>
+      <dt>Module A — lot-relative</dt><dd>robust z = (value − lot median) / (IQR/1.35), per lot and parameter, for the 24 h level and the 0→24 h drift. REVIEW at |z| ≥ ${d.z_review}; REJECT when level and drift are both ≥ ${d.z_reject}.</dd>
+      <dt>Module B — safety slope</dt><dd>predicted drift rate (Ŷ168 − V0)/168 h compared with ${esc(s.allowance_kind)} allowance ${s.allowance_value}${s.allowance_kind === "relative" ? " × |V0|" : ""} / 168 h, or Ŷ168 outside the datasheet limit.</dd>
+      <dt>Prediction interval</dt><dd>split-conformal, target ${p.coverage ? Math.round(p.coverage * 100) + " %" : "—"} marginal coverage across parts — not a per-part guarantee and not a failure probability.</dd>
+      <dt>Minimum lot size</dt><dd>${s.min_lot_size} (smaller lots → REVIEW, robust statistics unreliable)</dd>
+      <dt>Raw column mapping</dt><dd>${p.mapping_configured ? "configured on the server" : "none — upload canonical columns"}</dd>
+    </dl>
+    <h2 style="margin-top:18px">Per-parameter model (Module B)</h2>
+    <div class="scroll" style="max-height:none"><table><tr><th>Parameter</th><th>Degradation direction</th><th>168 h predictor</th><th>Interval half-width (unit of parameter)</th></tr>${preds}</table></div>
+    <h2 style="margin-top:18px">Provenance</h2>
+    <dl class="kv">${Object.entries(m).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(typeof v === "object" ? JSON.stringify(v) : v)}</dd>`).join("")}
+      <dt>pipeline sha256</dt><dd><code>${esc(p.sha256)}</code></dd></dl>
+    <p class="muted">Robust z is a distance in robust-sigma units, not a probability. Validation numbers above come from the lots the pipeline was fitted on; see the fit summary for held-out evaluation status.</p>`;
+}
+
+// ---- runs ----
+async function loadRuns() {
+  const runs = await api("/api/runs?limit=100");
+  const ul = $("runs");
+  if (!runs.length) { ul.innerHTML = `<li class="muted">none yet</li>`; return; }
+  ul.innerHTML = runs.map((r) => `<li data-id="${esc(r.run_id)}" class="${state.run && state.run.audit.run_id === r.run_id ? "active" : ""}">
+    <b>${esc(r.source_name)}</b> <span class="chip">${esc(r.data_category)}</span>
+    <small>${esc(r.created_utc.replace("T", " ").replace("+00:00", " UTC"))} · ${r.rows} rows · <span class="REJECT">${r.decisions.REJECT}</span> / <span class="REVIEW">${r.decisions.REVIEW}</span> / <span class="PASS">${r.decisions.PASS}</span></small></li>`).join("");
+}
+
+$("runs").addEventListener("click", async (e) => {
+  const li = e.target.closest("li[data-id]");
+  if (li) showRun(await api(`/api/runs/${encodeURIComponent(li.dataset.id)}`));
+});
+
+function showRun(run) {
+  state.run = run; state.selected = null;
+  const a = run.audit;
+  $("no-run").classList.add("hidden"); $("run-view").classList.remove("hidden"); $("detail-panel").classList.add("hidden");
+  const official = a.data_category === "official";
+  $("banner").className = "banner " + (official ? "official" : "nonofficial");
+  $("banner").textContent = `DATA CATEGORY: ${a.data_category.toUpperCase()}` + (official ? "" : " — not official SIH/ISRO data");
+  $("run-meta").innerHTML = [
+    ["Run", `<code>${esc(a.run_id)}</code>`], ["Source file", esc(a.source_name)], ["Recorded", esc(a.created_utc)],
+    ["Rows / lots", `${a.rows} / ${a.lots}`], ["Checkpoint", esc(a.checkpoint)], ["Screening time", `${a.elapsed_ms} ms`],
+    ["Input sha256", `<code>${esc(a.input_sha256.slice(0, 16))}…</code>`], ["Pipeline sha256", `<code>${esc(a.pipeline_sha256.slice(0, 16))}…</code>`],
+    ["Code version", `<code>${esc(a.code_version)}</code>`],
+  ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+  const base = `/api/runs/${encodeURIComponent(a.run_id)}`;
+  $("run-links").innerHTML = `<a href="${base}/files/decisions.csv">decisions.csv</a><a href="${base}/files/lot_summary.csv">lot_summary.csv</a>
+    <a href="${base}/files/report.html" target="_blank" rel="noopener">printable report</a><a href="${base}/files/audit.json">audit.json</a>
+    ${run.overrides.length ? `<a href="${base}/files/overrides.jsonl">overrides.jsonl (${run.overrides.length})</a>` : ""}
+    <button id="replay" type="button">Verify by replay</button> <span id="replay-msg" class="muted"></span>`;
+  $("replay").onclick = async () => {
+    $("replay-msg").textContent = "recomputing…";
+    const r = await api(`${base}/replay`);
+    $("replay-msg").innerHTML = r.identical ? `<span class="PASS">identical decisions reproduced from stored input + pipeline</span>` : `<span class="REJECT">MISMATCH — investigate</span>`;
+  };
+  $("warnings").innerHTML = a.warnings.map((w) => `<div class="warn">⚠ ${esc(w)}</div>`).join("");
+  const n = a.rows || 1;
+  $("tiles").innerHTML = ["REJECT", "REVIEW", "PASS"].map((d) =>
+    `<div class="tile"><span class="muted">${d}</span><b class="${d}">${a.decisions[d]}</b><span class="muted">${(100 * a.decisions[d] / n).toFixed(1)} % of rows</span></div>`).join("")
+    + `<div class="tile"><span class="muted">Engineer decisions</span><b>${run.overrides.length}</b><span class="muted">recorded overrides</span></div>`;
+  $("lots").innerHTML = `<thead><tr><th>Lot</th><th>Parameter</th><th>n</th><th>REJECT</th><th>REVIEW</th><th>PASS</th><th>Review rate</th><th>Median 24 h</th><th>Robust σ</th><th>Median drift</th><th>Lot flags</th></tr></thead><tbody>`
+    + run.lots.map((l) => `<tr><td>${esc(l.lot_id)}</td><td>${esc(l.parameter)}</td><td class="num">${l.n}</td><td class="num REJECT">${l.REJECT}</td><td class="num REVIEW">${l.REVIEW}</td><td class="num PASS">${l.PASS}</td>
+      <td class="num">${(100 * l.review_rate).toFixed(1)} %</td><td class="num">${num(l.lot_median_level)} ${esc(l.unit)}</td><td class="num">${num(l.lot_scale_level)}</td><td class="num">${num(l.lot_median_drift)}</td><td>${esc(l.quality_flags) || "—"}</td></tr>`).join("") + "</tbody>";
+  renderRows(); loadRuns();
+}
+
+function renderRows() {
+  const run = state.run, q = state.query.toLowerCase(), f = state.filter;
+  const order = { REJECT: 0, REVIEW: 1, PASS: 2 };
+  const overridden = new Map(run.overrides.map((o) => [o.row, o.engineer_decision]));
+  let rows = run.rows.filter((r) => (f === "all" || (f === "flagged" ? r.decision !== "PASS" : r.decision === f))
+    && (!q || `${r.component_id} ${r.lot_id} ${r.parameter}`.toLowerCase().includes(q)));
+  rows.sort((a, b) => order[a.decision] - order[b.decision] || String(a.lot_id).localeCompare(b.lot_id) || String(a.component_id).localeCompare(b.component_id));
+  const LIMIT = 500;
+  $("count").textContent = `${rows.length} rows` + (rows.length > LIMIT ? ` — showing first ${LIMIT}; use search or download decisions.csv` : "");
+  $("rows").innerHTML = `<thead><tr><th>Decision</th><th>Rules</th><th>Component</th><th>Lot</th><th>Parameter</th><th>0 h</th><th>24 h</th><th>Limit</th><th>z level</th><th>z drift</th><th>Pred. 168 h</th><th>Interval</th><th>Quality flags</th><th>Engineer</th></tr></thead><tbody>`
+    + rows.slice(0, LIMIT).map((r) => `<tr class="click${state.selected === r.row ? " sel" : ""}" data-row="${r.row}">
+      <td><span class="badge ${r.decision}">${r.decision}</span></td><td>${esc(r.fired_rules)}</td><td>${esc(r.component_id)}</td><td>${esc(r.lot_id)}</td><td>${esc(r.parameter)}</td>
+      <td class="num">${num(r.value_0h)}</td><td class="num">${num(r.value_24h)}</td><td class="num">${r.spec_min === null ? "" : num(r.spec_min) + " – "}${num(r.spec_max)} ${esc(r.unit)}</td>
+      <td class="num">${num(r.z_level, 3)}</td><td class="num">${num(r.z_drift, 3)}</td><td class="num">${num(r.pred_168h)}</td>
+      <td class="num">${r.pi_low === null || r.pi_low === undefined ? "—" : `${num(r.pi_low)} – ${num(r.pi_high)}`}</td><td>${esc(r.gate_codes) || ""}</td>
+      <td>${overridden.has(r.row) ? `<span class="badge ${overridden.get(r.row)}">${overridden.get(r.row)}</span>` : ""}</td></tr>`).join("") + "</tbody>";
+}
+
+$("rows").addEventListener("click", (e) => { const tr = e.target.closest("tr[data-row]"); if (tr) showDetail(Number(tr.dataset.row)); });
+$("filter").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-f]"); if (!b) return;
+  state.filter = b.dataset.f; document.querySelectorAll("#filter button").forEach((x) => x.classList.toggle("on", x === b)); renderRows();
+});
+$("search").addEventListener("input", (e) => { state.query = e.target.value; renderRows(); });
+
+async function showDetail(row) {
+  state.selected = row; renderRows();
+  const id = encodeURIComponent(state.run.audit.run_id);
+  const card = await api(`/api/runs/${id}/rows/${row}`);
+  const r = state.run.rows[row];
+  $("detail-panel").classList.remove("hidden");
+  $("d-head").innerHTML = `<span class="badge ${r.decision}">${r.decision}</span> ${esc(card.headline)}`;
+  $("d-lines").innerHTML = card.lines.map((l) => `<li>${esc(l)}</li>`).join("");
+  $("d-chart").innerHTML = card.svg + `<p class="muted" style="font-size:12px">● measured 0 h / 24 h · shaded: lot median ± 3 robust σ at 24 h · dashed red: datasheet limit · dotted: safety slope from 0 h · ○ with bar: predicted 168 h and interval.</p>`;
+  $("d-overrides").innerHTML = card.overrides.length ? `<h3 style="font-size:14px;margin:10px 0 4px">Engineer decisions</h3><ul>` + card.overrides.map((o) =>
+    `<li><span class="badge ${o.engineer_decision}">${o.engineer_decision}</span> by ${esc(o.engineer)} (${esc(o.recorded_utc)}): ${esc(o.reason)}</li>`).join("") + "</ul>" : "";
+  $("ov-msg").textContent = "";
+  $("detail-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+$("ov-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const id = encodeURIComponent(state.run.audit.run_id);
+  try {
+    await api(`/api/runs/${id}/overrides`, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ row: state.selected, decision: $("ov-dec").value, engineer: $("ov-eng").value, reason: $("ov-reason").value }) });
+    $("ov-reason").value = "";
+    const sel = state.selected;
+    state.run = await api(`/api/runs/${id}`); showRun(state.run); showDetail(sel);
+  } catch (err) { $("ov-msg").textContent = err.message; }
+});
+
+// ---- upload ----
+function setFile(f) { state.file = f; $("fname").textContent = f ? f.name : ""; updateRun(); }
+function updateRun() { $("run").disabled = !(state.file && $("category").value); }
+$("drop").addEventListener("click", () => $("file").click());
+$("drop").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") $("file").click(); });
+$("file").addEventListener("change", (e) => setFile(e.target.files[0] || null));
+["dragenter", "dragover"].forEach((t) => $("drop").addEventListener(t, (e) => { e.preventDefault(); $("drop").classList.add("over"); }));
+["dragleave", "drop"].forEach((t) => $("drop").addEventListener(t, (e) => { e.preventDefault(); $("drop").classList.remove("over"); }));
+$("drop").addEventListener("drop", (e) => setFile(e.dataTransfer.files[0] || null));
+$("category").addEventListener("change", updateRun);
+$("run").addEventListener("click", async () => {
+  const err = $("upload-err"); err.classList.add("hidden");
+  $("run").disabled = true; $("run").textContent = "Screening…";
+  try {
+    const qs = new URLSearchParams({ category: $("category").value, source: state.file.name, version: $("version").value || "unversioned" });
+    const run = await api(`/api/screen?${qs}`, { method: "POST", headers: { "Content-Type": "text/csv" }, body: await state.file.arrayBuffer() });
+    selectTab("results"); showRun(run);
+  } catch (e) { err.textContent = e.message; err.classList.remove("hidden"); }
+  finally { $("run").textContent = "Screen lot"; updateRun(); }
+});
+
+// ---- tabs ----
+function selectTab(name) {
+  document.querySelectorAll(".tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === name));
+  $("tab-results").classList.toggle("hidden", name !== "results"); $("tab-method").classList.toggle("hidden", name !== "method");
+}
+document.querySelector(".tabs").addEventListener("click", (e) => { const b = e.target.closest("button[data-tab]"); if (b) selectTab(b.dataset.tab); });
+
+loadPipeline().catch((e) => { $("hdr-checkpoint").textContent = "pipeline unavailable: " + e.message; });
+loadRuns().catch(() => {});
+</script>
+</body>
+</html>

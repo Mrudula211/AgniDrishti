@@ -22,7 +22,9 @@ potential future degradation.
 
 # 0. Current Phase (read first)
 
-**Phase: PROTOTYPE BUILT — awaiting team review** (P2–P7 completed 2026-09-26; results in
+**Phase: DEPLOYABLE PROTOTYPE BUILT — awaiting team review** (P2–P7 completed 2026-09-26;
+deployable screening service, site calibration and audit trail added 2026-09-28 at the team's
+request, [ADR-006](docs/decisions/ADR-006-deployable-service.md); results in
 `docs/research/experiments/ablation-plan.md` §3–§5; v1 test split spent — changes need a
 new pre-registered config and fresh data). Authorisation record: P2–P7 authorised by the team 2026-09-26 (
 "do everything as per you", end product in 2 days). P1 data foundation is done.
@@ -49,9 +51,9 @@ Still NOT allowed in P1 until their gates are met:
   pre-registered); development generator + E0 audit implemented (FR-17–FR-19).
   Never create or reconstruct held-out families 19–20.
 - ~~Experiments E1–E6~~ — gate met 2026-09-26 (pre-registration above).
-- Still not allowed: advanced / black-box models (CLAUDE §4), a web server or
-  database, notebooks with production logic, any number in the demo that does
-  not come from a recorded run.
+- Still not allowed: advanced / black-box models (CLAUDE §4), a database,
+  notebooks with production logic, any number in the demo that does not come
+  from a recorded run. (The web service is allowed since 2026-09-28, ADR-006.)
 
 No implementation may begin without a documented requirement in
 `docs/requirements/requirements-specification.md` and a planned experiment in

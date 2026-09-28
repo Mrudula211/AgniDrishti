@@ -94,3 +94,4 @@ which supersedes the "Unknown" fields below where they differ.
 | Missing data | Injected deliberately: 57 rows with one checkpoint missing; 53 glitch rows; 2 quantised lots |
 | Limitations | Reflects our assumptions only; cannot validate real-world performance; circularity risk (see [synthetic-data-design.md](synthetic-data-design.md)) |
 | Intended use | Controlled stress tests, ablation, demo (always labelled synthetic) |
+| Derived files | `synthetic_development_v1_test_lots_24h_upload.csv` (2026-09-28): the 10 test-split lots, canonical columns available at 24 h only (no 96/168 h values, no ground truth) — demo upload for the screening service; regenerate with `scripts/make_demo_upload.py` |

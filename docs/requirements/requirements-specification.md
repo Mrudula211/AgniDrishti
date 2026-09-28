@@ -1,6 +1,6 @@
 # Requirements Specification — AgniDrishti
 
-Status: Draft · Last updated: 2026-09-26
+Status: Draft · Last updated: 2026-09-28
 
 Requirements for the **future** system. Nothing here is implemented.
 Each requirement cites its origin:
@@ -30,9 +30,11 @@ Priority: **M** must (PS-mandated or needed for any valid result) · **S** shoul
 | FR-19 | **Proxy labels** `label_spec_168h` and `label_safety_slope` (ADR-002 §11, ADR-004) for any drift allowance, absolute or relative, and any degradation direction; evaluation only. | ADR-002, ADR-004 | M | Unit tests vs hand-computed cases — `src/agnidrish/labels.py` |
 | FR-10 | **Decision**: assign PASS / REVIEW / REJECT by documented, configurable rules. Missing or invalid inputs → REVIEW. | PR (PSR-05) | S | Unit tests per rule; E6 |
 | FR-11 | **Explanation**: for every component with REVIEW or REJECT (and on request for PASS), produce the quantitative evidence and the rule(s) that fired. | PSR-06 | M | Unit test on templates; review by team |
-| FR-12 | **Audit record** for every decision: input values, lot statistics used, config version, model version, outputs, rule(s) fired, timestamp. | EI (PSR-06) | S | Integration test |
-| FR-13 | **Engineer override** of a decision, stored alongside the original decision. | PR | C | — (P7) |
-| FR-14 | **Lot summary**: lot statistics, lot-level flags, decision counts, review rate. | EI | S | Integration test |
+| FR-12 | **Audit record** for every decision: input values, lot statistics used, config version, model version, outputs, rule(s) fired, timestamp. | EI (PSR-06) | S | Integration test — **implemented 2026-09-28**: `agnidrish.service.record_run` (`audit.json` + input and pipeline copies), `tests/unit/test_service.py` |
+| FR-13 | **Engineer override** of a decision, stored alongside the original decision. | PR | C | **Implemented 2026-09-28**: append-only `overrides.jsonl`, pipeline decision unchanged — `agnidrish.service.add_override`, API `POST /api/runs/{id}/overrides` |
+| FR-14 | **Lot summary**: lot statistics, lot-level flags, decision counts, review rate. | EI | S | Integration test — **implemented 2026-09-28**: `agnidrish.service.lot_summary` |
+| FR-20 | **Site calibration**: fit a frozen pipeline on a site's historical lots (with measured `value_168h`) by re-running the pre-registered E1–E6 development procedure; lot-grouped splits; a `test` split is never read. | EI (ADR-006) | S | Unit tests — `agnidrish.fit`, `scripts/fit_pipeline.py`, `tests/unit/test_fit.py` |
+| FR-21 | **Screening service**: HTTP API + web UI for upload, decisions, evidence cards, overrides, replay; later checkpoints and evaluation-only columns removed before screening. | EI (ADR-006) | S | Integration tests — `app/server.py`, `tests/integration/test_api.py` |
 | FR-15 | **Evaluation harness**: compute the metrics in the [evaluation protocol](../research/experiments/evaluation-protocol.md) from predictions and labels, per data category. | EI | M | Unit tests vs hand-computed metrics |
 
 ## 2. Non-functional requirements
@@ -55,6 +57,6 @@ Priority: **M** must (PS-mandated or needed for any valid result) · **S** shoul
 
 ## 3. Out of scope for now
 
-Frontend, dashboard, API server, database, authentication, deployment, deep
-sequence models, digital-twin framing, RUL estimation. May be reconsidered after
-P6 with a documented reason.
+Database, authentication (the service runs behind the site's proxy / single sign-on), deep
+sequence models, digital-twin framing, RUL estimation, multi-checkpoint (96 h / 168 h) decision
+modes. Frontend, API server and deployment moved into scope 2026-09-28 (ADR-006).

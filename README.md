@@ -2,7 +2,7 @@
 
 **SIH 2026 — Problem Statement 26170: AI-Driven Anomaly Detection in Component Burn-In & Screening**
 
-> **Status: working prototype (P2–P7 built 2026-09-26) — evaluated on SYNTHETIC data only.**
+> **Status: deployable prototype (P2–P7 built 2026-09-26; screening service 2026-09-28) — evaluated on SYNTHETIC data only.**
 > Pipeline: quality gate → datasheet limit → lot-relative level/drift → 168 h prediction → prediction interval →
 > ordered PASS/REVIEW/REJECT rules → evidence card. No official PS dataset exists; nothing here is ISRO hardware data.
 
@@ -55,14 +55,14 @@ docs/
   team-understanding/     Plain-language guides for teammates
   project-state.md        Current state summary
   glossary.md             Terminology rules
-data/                     raw / external / synthetic / interim / processed (empty)
+data/                     raw / external / synthetic / interim / processed (git-ignored)
 notebooks/                Exploration (empty)
-src/                      Package src/agnidrish/ (P1: schema + data-quality gate)
-tests/                    unit tests for the package
-configs/                  Configuration (empty)
-scripts/                  Command-line workflows (empty)
+src/                      Package src/agnidrish/ (pipeline layers L0–L7, fit, service)
+tests/                    unit + integration tests
+configs/                  Experiment, synthetic-data and deployment configs
+scripts/                  Generate, experiment, fit, screen, demo workflows
 artifacts/                models / metrics / plots / predictions (git-ignored)
-app/                      Demo application (phase P7)
+app/                      Screening web service + QA-inspector UI (ADR-006)
 .github/                  PR template
 ```
 
@@ -76,15 +76,15 @@ app/                      Demo application (phase P7)
 | Prior art | Partly verified against primary sources (AEC-Q001, ESCC 9000, C&IE 2025, ESREL 2023, US 8,010,310, conformal literature) — [literature-review.md](docs/research/prior-art/literature-review.md). Lot-relative and burn-in drift screening are established prior art |
 | Safety slope / drift rate | Not defined by the PS; our definition in [ADR-002](docs/decisions/ADR-002-safety-slope-and-drift-rate.md) (accepted 2026-09-26; allowance value not yet set) |
 | Risks and PS gaps | [drawbacks-and-risks.md](docs/research/drawbacks-and-risks.md) |
-| Datasets | Official: none exists. External: NASA MOSFET + IGBT downloaded, checksummed and inspected — [external-datasets.md](docs/research/datasets/external-datasets.md), [compatibility](docs/research/datasets/external-dataset-compatibility.md). Synthetic: not generated |
+| Datasets | Official: none exists. External: NASA MOSFET + IGBT downloaded, checksummed and inspected — [external-datasets.md](docs/research/datasets/external-datasets.md), [compatibility](docs/research/datasets/external-dataset-compatibility.md). Synthetic: development v1 generated and E0-audited |
 | Architecture | Provisional |
-| Experiments | Planned (E0–E6), none executed |
+| Experiments | E0–E6 recorded on synthetic data — [ablation-plan.md](docs/research/experiments/ablation-plan.md) §3–§5 |
 
 ## Development phases
 
-P0 research (done) → **P1 data foundation (current)** → P2 baseline → P3 lot + trajectory
-→ P4 168h prediction → P5 uncertainty + decision → P6 explainability → P7 demo
-→ P8 presentation. Details: [docs/roadmap/implementation-plan.md](docs/roadmap/implementation-plan.md).
+P0 research → P1 data foundation → P2 baseline → P3 lot + trajectory
+→ P4 168h prediction → P5 uncertainty + decision → P6 explainability → P7 demo + service (all done)
+→ **P8 presentation (next, needs team decision)**. Details: [docs/roadmap/implementation-plan.md](docs/roadmap/implementation-plan.md).
 
 ## How to contribute
 
@@ -98,7 +98,7 @@ P0 research (done) → **P1 data foundation (current)** → P2 baseline → P3 l
 Python 3.11+. Dependencies and their reasons are in `pyproject.toml`.
 
 ```
-pip install -e ".[dev]"
+pip install -e ".[dev,serve]"
 python -m pytest
 python scripts/generate_synthetic.py   # SYNTHETIC development data + E0 audit
 python scripts/run_experiments.py      # E1–E6 on validation lots -> artifacts/metrics/E1-E6_validation/<run>
@@ -106,14 +106,23 @@ python scripts/run_experiments.py --final artifacts/metrics/E1-E6_validation/<ru
 python scripts/build_demo.py artifacts/metrics/E1-E6_test/<run>                      # demo page
 ```
 
-## Prototype
+## Prototype — screening service
 
-Screen a lot file at 24 h with a frozen pipeline; writes `decisions.csv` and an HTML
-evidence report under `artifacts/screening/`:
+Full runbook: [docs/architecture/deployment.md](docs/architecture/deployment.md) · decision: [ADR-006](docs/decisions/ADR-006-deployable-service.md).
 
 ```
-python scripts/screen_lot.py --input lots.csv --category synthetic     --pipeline artifacts/metrics/E1-E6_validation/<run>/frozen_pipeline.json
+# 1. Fit a pipeline (here: the synthetic demo site; a real site uses its historical lots with 168 h values)
+python scripts/fit_pipeline.py --input data/synthetic/development/synthetic_development_v1_seed20260926.csv        --category synthetic --config configs/deployment/fit_synthetic_demo.yaml
+# 2. Demo upload file: held-out synthetic test lots as exported at 24 h
+python scripts/make_demo_upload.py
+# 3. Serve the UI + API on http://localhost:8000 (native, Windows or Linux, no Docker)
+python scripts/serve.py --pipeline latest
+# or batch, same code path:
+python scripts/screen_lot.py --input lots.csv --category synthetic --pipeline artifacts/models/pipeline/<run>/pipeline.json
 ```
+
+Every run is recorded under `artifacts/screening/<run>/` (input and pipeline copies, decisions, lot summary,
+HTML report, `audit.json`, engineer overrides) and can be replayed to check that decisions are reproduced.
 
 Input: canonical columns (`component_id, lot_id, parameter, unit, value_0h, value_24h,
 spec_min, spec_max, …`) or a raw file plus `--mapping mapping.yaml`. Later checkpoints are

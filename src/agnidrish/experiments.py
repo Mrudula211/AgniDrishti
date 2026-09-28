@@ -196,8 +196,9 @@ def develop(table: pd.DataFrame, cfg: dict[str, Any]) -> dict[str, Any]:
             p: interval_metrics(val.loc[r, "value_168h"], pi_low[r], pi_high[r]) for p, r in val.groupby("parameter").groups.items()
         },
         "per_lot_coverage": _per_group_coverage(val, pi_low, pi_high, "lot_id"),
-        "per_scenario_coverage": _per_group_coverage(val, pi_low, pi_high, "lot_scenario"),
     }
+    if "lot_scenario" in val.columns:  # synthetic ground truth; absent in real historical data
+        coverage["per_scenario_coverage"] = _per_group_coverage(val, pi_low, pi_high, "lot_scenario")
     return {
         "specs": specs,
         "predictor_comparison": comparison,

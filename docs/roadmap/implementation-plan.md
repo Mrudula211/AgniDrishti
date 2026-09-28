@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Status: Draft · Last updated: 2026-09-26
+Status: Draft · Last updated: 2026-09-28
 
 **P1 done; P2–P7 authorised 2026-09-26** (CLAUDE.md §0; values pre-registered in `configs/experiments/pipeline_v1.yaml`).
 Each step is one small, reviewable change: requirement → minimal code → test →
@@ -33,7 +33,7 @@ All gaps and risks: [drawbacks-and-risks.md](../research/drawbacks-and-risks.md)
 | P4 | 168h prediction | B0–B3; safety-slope rule; E4 (+ E4b only if justified) | E4 recorded |
 | P5 | Uncertainty + decision | U1; rule engine; E5, E6 | E5, E6 recorded; ADR-001 → Accepted or revised |
 | P6 | Explainability | Templates, audit record, trajectory map | Every rule has tested explanation |
-| P7 | Demo app | Minimal UI over recorded runs (tech choice via ADR) | Demo uses only recorded outputs, category shown |
+| P7 | Demo app + deployable service | Minimal UI over recorded runs; **2026-09-28:** screening service, site calibration, audit trail ([ADR-006](../decisions/ADR-006-deployable-service.md), [deployment.md](../architecture/deployment.md)) | Demo uses only recorded outputs, category shown; service reproduces recorded decisions — **met 2026-09-28** |
 | P8 | Presentation | Slides from recorded evidence | Every number linked to a run |
 
 ## Recommended next step
