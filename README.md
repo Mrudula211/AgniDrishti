@@ -108,26 +108,30 @@ python scripts/build_demo.py artifacts/metrics/E1-E6_test/<run>                 
 
 ## Prototype — screening service
 
-Full runbook: [docs/architecture/deployment.md](docs/architecture/deployment.md) · decision: [ADR-006](docs/decisions/ADR-006-deployable-service.md).
+Runbook: [deployment.md](docs/architecture/deployment.md) · onboarding a new site / data format:
+[data-ingestion.md](docs/architecture/data-ingestion.md) · decisions: [ADR-006](docs/decisions/ADR-006-deployable-service.md),
+[ADR-007](docs/decisions/ADR-007-dataset-agnostic-ingestion.md).
 
 ```
-# 1. Fit a pipeline (here: the synthetic demo site; a real site uses its historical lots with 168 h values)
-python scripts/fit_pipeline.py --input data/synthetic/development/synthetic_development_v1_seed20260926.csv        --category synthetic --config configs/deployment/fit_synthetic_demo.yaml
+# 1. Fit a pipeline (here: the synthetic demo site; a real site uses its own historical lots with 168 h readings)
+python scripts/fit_pipeline.py --input data/synthetic/development/synthetic_development_v1_seed20260926.csv \
+       --category synthetic --site configs/sites/synthetic_demo.yaml
 # 2. Demo upload file: held-out synthetic test lots as exported at 24 h
 python scripts/make_demo_upload.py
 # 3. Serve the UI + API on http://localhost:8000 (native, Windows or Linux, no Docker)
-python scripts/serve.py --pipeline latest
+python scripts/serve.py --site configs/sites/synthetic_demo.yaml --pipeline latest
 # or batch, same code path:
-python scripts/screen_lot.py --input lots.csv --category synthetic --pipeline artifacts/models/pipeline/<run>/pipeline.json
+python scripts/screen_lot.py --input export.csv --site configs/sites/synthetic_demo.yaml --category synthetic --pipeline <pipeline.json>
 ```
 
-Every run is recorded under `artifacts/screening/<run>/` (input and pipeline copies, decisions, lot summary,
-HTML report, `audit.json`, engineer overrides) and can be replayed to check that decisions are reproduced.
+The system is not tied to one data format. A site describes its tester export, parameters, units and
+specification-limit sources in one config file (`configs/sites/site_template.yaml`); the UI detects the layout of an
+unseen file and lets the engineer confirm the column mapping. Parameters without a fitted 168 h forecast are still
+screened by the lot-relative and datasheet rules, and every output says so.
 
-Input: canonical columns (`component_id, lot_id, parameter, unit, value_0h, value_24h,
-spec_min, spec_max, …`) or a raw file plus `--mapping mapping.yaml`. Later checkpoints are
-dropped before screening. Results so far are on **synthetic** data only:
-[ablation-plan.md](docs/research/experiments/ablation-plan.md) §3–§5.
+Every run is recorded under `artifacts/screening/<run>/` (input, pipeline and site-config copies, decisions, lot
+summary, HTML report, `audit.json`, engineer overrides) and can be replayed to check that decisions are reproduced.
+Results so far are on **synthetic** data only: [ablation-plan.md](docs/research/experiments/ablation-plan.md) §3–§5.
 
 ## Important limitations
 

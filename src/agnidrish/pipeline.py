@@ -7,7 +7,7 @@ validation lots) and then applied unchanged to test lots or new data.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 
 import numpy as np
 import pandas as pd
@@ -111,7 +111,30 @@ def evidence(table: pd.DataFrame, spec: PipelineSpec) -> pd.DataFrame:
     return out
 
 
+FORECAST_APPLIED = "applied"
+FORECAST_NO_MODEL = "no validated model for this parameter"
+FORECAST_OFF = "not used by this pipeline"
+
+
+def forecast_status(table: pd.DataFrame, spec: PipelineSpec) -> pd.Series:
+    """Per row: whether Module B (168 h forecast + safety slope) is applied (ADR-007).
+
+    A parameter the pipeline has no fitted predictor for is not forecast; its rows are
+    decided by the quality gate, the datasheet limit and the lot-relative rules alone.
+    """
+    if not spec.decision.use_prediction:
+        return pd.Series(FORECAST_OFF, index=table.index, dtype=object)
+    fitted = table["parameter"].isin(list(spec.predictors))
+    return pd.Series(np.where(fitted, FORECAST_APPLIED, FORECAST_NO_MODEL), index=table.index, dtype=object)
+
+
 def screen(table: pd.DataFrame, spec: PipelineSpec) -> pd.DataFrame:
-    """Evidence plus ``decision``, ``fired_rules`` and ``binary_flag`` for every row."""
+    """Evidence plus ``forecast_status``, ``decision``, ``fired_rules`` and ``binary_flag`` for every row."""
     ev = evidence(table, spec)
-    return ev.join(decide(ev, spec.decision))
+    ev["forecast_status"] = forecast_status(table, spec)
+    decided = decide(ev, spec.decision)
+    no_model = ev["forecast_status"] == FORECAST_NO_MODEL
+    if no_model.any():
+        lot_only = replace(spec.decision, use_prediction=False, use_interval=False)
+        decided.loc[no_model] = decide(ev[no_model], lot_only)
+    return ev.join(decided)

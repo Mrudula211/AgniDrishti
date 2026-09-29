@@ -1,7 +1,8 @@
-"""Site calibration: fit a frozen PipelineSpec on historical burn-in lots (FR-20, ADR-006).
+"""Site calibration: fit a frozen PipelineSpec on historical burn-in lots (FR-20, ADR-006, ADR-007).
 
-A deployment site has its own parameters, units and lots, so the frozen v1
-pipeline (fitted on SYNTHETIC data for iddq/tpd) cannot be reused as-is. This
+A deployment site has its own parameters, units and lots, so a pipeline fitted
+elsewhere cannot be reused as-is. Input is the canonical table produced by
+``agnidrish.ingest`` from the site's own export format. This
 module re-runs exactly the pre-registered development procedure of E1-E6
 (``experiments.develop``) on the site's historical data:
 
@@ -28,6 +29,7 @@ import yaml
 
 from agnidrish.experiments import develop
 from agnidrish.schema import Checkpoint, SchemaError, required_columns
+from agnidrish.site import SiteConfig
 
 log = logging.getLogger(__name__)
 
@@ -35,19 +37,26 @@ FIT_SPLITS: tuple[str, ...] = ("train", "calibration", "validation")
 METHOD_SECTIONS: tuple[str, ...] = ("checkpoint", "quality_gate", "lot_relative", "prediction", "uncertainty", "operating_point")
 
 
-def load_fit_config(path: Path, repo_root: Path) -> dict[str, Any]:
-    """Site config (label, splits) merged over the method sections of the pre-registered config it names.
+def fit_config(site: SiteConfig, repo_root: Path) -> dict[str, Any]:
+    """Experiment-style config: site calibration settings merged over the pre-registered method sections.
 
-    Methods are never redefined per site: ``methods_from`` points at the
-    pre-registered experiment config, so a deployed pipeline is fitted with the
-    same procedure that E1-E6 evaluated.
+    Methods are never redefined per site: ``calibration.methods_from`` points at the
+    pre-registered experiment config, so a deployed pipeline is fitted with the same
+    procedure that E1-E6 evaluated. Degradation directions come from the parameter registry.
     """
-    site = yaml.safe_load(path.read_text(encoding="utf-8"))
-    methods = yaml.safe_load((repo_root / site["methods_from"]).read_text(encoding="utf-8"))
+    cal = site.calibration
+    missing = [k for k in ("methods_from", "allowance", "splits") if k not in cal]
+    if missing:
+        raise SchemaError(f"site {site.name}: calibration lacks {missing}")
+    methods = yaml.safe_load((repo_root / cal["methods_from"]).read_text(encoding="utf-8"))
     cfg = {k: methods[k] for k in METHOD_SECTIONS}
-    cfg["label"] = site["label"]
-    cfg["splits"] = site["splits"]
-    cfg["methods_from"] = site["methods_from"]
+    cfg["label"] = {
+        "primary": "label_safety_slope",
+        "allowance": dict(cal["allowance"]),
+        "directions": {n: p.direction for n, p in site.parameters.items() if p.direction},
+    }
+    cfg["splits"] = cal["splits"]
+    cfg["methods_from"] = cal["methods_from"]
     cfg["dataset"] = {
         "fit_splits": {"model": "train", "conformal": "calibration"},
         "development_split": "validation",
@@ -88,16 +97,23 @@ def assign_lot_splits(lot_ids: pd.Series, fractions: Mapping[str, float], seed: 
 def prepare_history(table: pd.DataFrame, cfg: Mapping[str, Any]) -> pd.DataFrame:
     """Validate historical data and attach lot-grouped splits; ``test`` rows are dropped unread.
 
+    Rows of parameters without a degradation direction are left out (no forecast is fitted for them).
+
     Raises:
-        SchemaError: required columns missing, no value_168h, or a parameter without a configured direction.
+        SchemaError: required columns missing, no value_168h, no parameter with a direction, or an empty split.
     """
     checkpoint = Checkpoint[cfg["checkpoint"]]
     missing = [c for c in (*required_columns(checkpoint), "value_168h") if c not in table.columns]
     if missing:
         raise SchemaError(f"historical data lacks columns needed to fit: {missing}")
-    unconfigured = sorted(set(table["parameter"]) - set(cfg["label"]["directions"]))
+    unconfigured = sorted(set(table["parameter"].dropna()) - set(cfg["label"]["directions"]))
     if unconfigured:
-        raise SchemaError(f"no degradation direction configured for parameters {unconfigured} (label.directions)")
+        # No direction -> no proxy label -> no forecast can be fitted or checked. These parameters are
+        # still screened later (datasheet + lot-relative rules) and reported as having no forecast model.
+        log.warning("not fitting a 168 h forecast for %s: no `direction` in the site parameter registry", unconfigured)
+        table = table[table["parameter"].isin(list(cfg["label"]["directions"]))]
+        if table.empty:
+            raise SchemaError("no parameter in the historical data has a degradation direction in the site registry")
     if "split" in table.columns:
         dropped = int((~table["split"].isin(FIT_SPLITS)).sum())
         if dropped:
@@ -119,6 +135,7 @@ def fit_pipeline(table: pd.DataFrame, cfg: Mapping[str, Any]) -> dict[str, Any]:
     """
     history = prepare_history(table, cfg)
     result = develop(history, dict(cfg))
+    result["not_forecast"] = sorted(set(table["parameter"].dropna()) - set(history["parameter"]))
     result["split_lots"] = {s: int(history.loc[history["split"] == s, "lot_id"].nunique()) for s in FIT_SPLITS}
     result["split_rows"] = {s: int((history["split"] == s).sum()) for s in FIT_SPLITS}
     return result

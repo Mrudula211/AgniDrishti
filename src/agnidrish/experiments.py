@@ -185,6 +185,9 @@ def develop(table: pd.DataFrame, cfg: dict[str, Any]) -> dict[str, Any]:
     }
     op = select_operating_point(label[val_rows], candidates, cfg["operating_point"]["target_recall"])
     specs["E6"] = replace(specs["E5"], decision=stage_decision_config("E6", z_rej, op["z_review"]))
+    # Leave-one-out −L4/−L5 (ablation-plan §2): the full rules without the forecast. This is how a
+    # parameter with no fitted 168 h model is decided (ADR-007), so every fit reports its performance.
+    no_forecast = replace(specs["E6"], decision=replace(specs["E6"].decision, use_prediction=False, use_interval=False))
 
     pred_val = predict_by_parameter(predictors, table[val_rows])
     pi_low = pred_val - table.loc[val_rows, "parameter"].map(halfwidths)
@@ -207,6 +210,7 @@ def develop(table: pd.DataFrame, cfg: dict[str, Any]) -> dict[str, Any]:
         "operating_point": op,
         "coverage_validation": coverage,
         "stages": run_stages(table, val_rows, specs, label),
+        "no_forecast_validation": run_stages(table, val_rows, {"E6_no_forecast": no_forecast}, label)["E6_no_forecast"],
         "label_positives": {s: int(label[split == s].sum()) for s in split.unique()},
         "label_spec_168h_positives_validation": int(label_spec_168h(val).sum()),
     }

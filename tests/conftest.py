@@ -1,4 +1,4 @@
-"""Shared fixtures: SYNTHETIC development data and one pipeline fitted on it (session scope, built once)."""
+"""Shared fixtures: SYNTHETIC development data, the demo site config, and one pipeline fitted on them (built once)."""
 
 import json
 from pathlib import Path
@@ -6,12 +6,15 @@ from pathlib import Path
 import pytest
 
 from agnidrish.experiments import to_jsonable
-from agnidrish.fit import fit_pipeline, load_fit_config
+from agnidrish.fit import fit_config as build_fit_config
+from agnidrish.fit import fit_pipeline
 from agnidrish.service import load_pipeline, pipeline_document
+from agnidrish.site import load_site
 from agnidrish.synthetic.config import load_config
 from agnidrish.synthetic.generator import generate
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+SITE_PATH = REPO_ROOT / "configs" / "sites" / "synthetic_demo.yaml"
 
 
 @pytest.fixture(scope="session")
@@ -20,8 +23,18 @@ def synthetic_data():
 
 
 @pytest.fixture(scope="session")
-def fit_config():
-    return load_fit_config(REPO_ROOT / "configs" / "deployment" / "fit_synthetic_demo.yaml", REPO_ROOT)
+def site_path():
+    return SITE_PATH
+
+
+@pytest.fixture(scope="session")
+def site():
+    return load_site(SITE_PATH, REPO_ROOT)
+
+
+@pytest.fixture(scope="session")
+def fit_config(site):
+    return build_fit_config(site, REPO_ROOT)
 
 
 @pytest.fixture(scope="session")
