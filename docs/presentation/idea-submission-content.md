@@ -1,6 +1,6 @@
 # Idea-Round Submission Content (SIH 2026, PS 26170)
 
-Status: Draft for team review · Last updated: 2026-09-29 (Rev. 3 — evidence-first rebuild after two external PPT audits) · Deadline: **30 Sep 2026**
+Status: Draft for team review · Last updated: 2026-09-29 (Rev. 7 — sixth audit: no “silent PASS” wording, baseline labelled “at 24 h”, Module B described as the model actually chosen (population increment beat regression), MAE marked validation lots, persistence defined, 8 of 14 REJECTs correct, one Δallow per site; earlier revisions in git history) · Deadline: **30 Sep 2026**
 
 Source text for the portal fields and the 6-slide official template (S-17).
 Rev. 2 (2026-09-26) carried no numbers because no experiment had run. The prototype
@@ -17,8 +17,8 @@ judge needs lives only in the notes.
 
 Before upload:
 1. Replace "(to be assigned on the SIH portal)" on slide 1 with the Team ID once assigned.
-2. Make `github.com/Mrudula211/AgniDrishti` public (slides 4 and 6 link to it), or
-   delete both links. A dead link costs more than no link.
+2. The repository is public (checked 2026-09-29, HTTP 200); slides 4 and 6 link to
+   `github.com/Mrudula211/AgniDrishti/tree/p1-synthetic-data`. Re-test it logged out before upload.
 3. Export to PDF and re-check all six pages.
 
 Story: **in spec is not the same as healthy — decide at hour 24, and never let
@@ -45,9 +45,9 @@ PASS / REVIEW / REJECT with the numbers and the rule that fired; bad data, or a
 range that could reach the limit, goes to an engineer instead of being passed.
 A working prototype (web service, CLI, audit record with replay, 111 automated
 tests) is built. On held-out synthetic test lots it flagged 24 of 30 drifting
-rows at hour 24 versus 4 of 30 for datasheet limits alone, sending 10.4 % of
-rows to engineer review. These are synthetic results, not ISRO results; ISRO
-performance will be measured on ISRO data. Code: github.com/Mrudula211/AgniDrishti
+rows at hour 24 (95 % CI 0.63–0.91) versus 4 of 30 for datasheet limits alone,
+sending 10.4 % of rows to engineer review. These are synthetic results, not ISRO results; ISRO
+performance will be measured on ISRO data. Code: github.com/Mrudula211/AgniDrishti/tree/p1-synthetic-data
 
 ---
 
@@ -86,14 +86,20 @@ Data category for all rows: **synthetic** (development v1, DS-04), unless stated
 
 | Number (slide) | Value | Source |
 |---|---|---|
-| Hero row (2) | 0 h 8.955, 24 h 12.34, 96 h 22.3, 168 h 32.0 µA; limit 30 µA; lot median 9.9 µA; 137 peers; drift 42.7 robust σ; REJECT, rules R2;R3;R5 | `artifacts/metrics/E1-E6_test/20260926-144448_c8ca99b/test_decisions.csv`, row SYN-L026-C0010 / iddq |
+| Hero row (2) | 0 h 8.955, 24 h 12.34, 96 h 22.3, 168 h 32.0 µA; limit 30 µA; lot median 9.9 µA; 137 peers; drift 42.7 robust σ; forecast 12.45 µA, 90 % range 12.14–12.76; drift rate at the optimistic end 0.0190 vs slope 0.0080 µA/h (2.4×, the end R2 uses; point 0.0208 = 2.6×); REJECT, rules R2;R3;R5 | `artifacts/metrics/E1-E6_test/20260926-144448_c8ca99b/test_decisions.csv`, row SYN-L026-C0010 / iddq |
 | Caught at 24 h (2, 5) | 4 / 4 / 20 / 24 of 30 | same run, recall 0.133 / 0.133 / 0.667 / 0.800 × 30 positives (summary.md) |
-| E1–E6 table (3) | recall, review rate, false rejection | same run, summary.md |
+| E1–E6 table (3) | recall, precision, review rate, false rejection | same run, summary.md |
+| Recall CI (2, 3) | 0.63–0.91 | Wilson 95 % interval for 24 / 30, computed 2026-09-29 |
+| REJECT quality (4) | 6 of 14 REJECTs false (8 true) | `test_decisions.csv` vs primary label (label_safety_slope, Δallow 0.15), computed 2026-09-29 |
+| Focus / enrichment (5) | 261 flagged rows (11.0 %) hold 24 of 30; 9.2 % vs 1.27 % base rate, ≈ 7× | same computation |
+| Part-parameter definition (3, 5) | 2,368 part-parameters = 1,184 parts × 2 parameters, 10 lots | `test_decisions.csv` |
+| Drift ratio (2) | 3.38 µA vs lot median drift 0.116 µA ≈ 29× | same row |
+| tpd MAE (3) | 0.0472 vs 0.0496 ns (persistence), validation lots | ablation-plan §3 |
 | Review share (2, 3, 5) | 10.4 %; PASS 89.0 %, REJECT 0.6 % | same run; reproduced by service run `20260929-035534_1f5d29a` (2107 / 247 / 14 of 2,368 rows) |
 | Forecast MAE (3) | Iddq 0.297 vs 0.338 µA; tpd 0.047 vs 0.050 ns | validation lots, [ablation-plan.md](../research/experiments/ablation-plan.md) §3 |
 | Coverage (3) | 0.887 on test (target 0.90) | test summary.md |
 | Escapes / false rejects (4) | 6 of 30; all 6 false rejects | ablation-plan.md §5 F5, F6 |
-| Screening time (4) | 2,368 rows in 0.43 s | service run `20260929-035534_1f5d29a` audit record (427.7 ms); one run, not a benchmark |
+| Scale (4) | 2,368 / 23,680 / 118,400 rows: 0.35 / 2.6 / 14.2 s (median of 3) | service runs 2026-09-29 `20260929-0420..`–`-0421..` on the frozen pipeline; test lots copied 10× / 50× with new lot IDs; one PC. Audit records in the local runs directory (not committed) |
 | Replay (4) | identical decisions | `GET /api/runs/20260929-035534_1f5d29a/replay` → `identical: true` |
 | Tests (4, 6) | 111 | `pytest` at commit `1f5d29a`, 111 passed (2026-09-29) |
 | Thresholds (3) | z 2.5 / 6, Δallow 15 %, IQR/1.35, 90 % | `configs/experiments/pipeline_v1.yaml`, ADR-002, ADR-005 |
@@ -102,8 +108,9 @@ Data category for all rows: **synthetic** (development v1, DS-04), unless stated
 | ESCC 9202/045 (6) | IDD ±75 nA; IOL ±15 % | literature-review.md S-03 |
 
 The hero chart and screenshots were produced on 2026-09-29 from the runs above
-(chart: matplotlib from `test_decisions.csv`; screenshots: the screening service on
-`frozen_pipeline.json` of run `20260926-144425_c8ca99b`). They are not stored in the
+(chart: matplotlib from `test_decisions.csv`, showing the 24 h forecast and its range
+as the pipeline produced them; screenshots: the screening service on
+`frozen_pipeline.json` of run `20260926-144425_c8ca99b`, cropped, with the replay check run). They are not stored in the
 repository; regenerate them from those runs if the deck is rebuilt.
 
 ## Claim checks
@@ -115,4 +122,4 @@ repository; regenerate them from those runs if the deck is rebuilt.
 - [x] NASA data marked external, planned, not yet run
 - [x] PDF exported via PowerPoint and all six pages inspected (no overlap or overflow)
 - [ ] Team ID filled in (team action)
-- [ ] Repository public, or links removed (team action)
+- [x] Repository public (HTTP 200, 2026-09-29); DOIs resolve via doi.org

@@ -1,6 +1,6 @@
 # Data Pipeline (Provisional)
 
-Status: Proposed · Last updated: 2026-09-26
+Status: Proposed · Last updated: 2026-09-29
 
 Covers ingestion, data zones, L0 (data quality gate) and L1 (absolute spec check).
 
@@ -68,12 +68,14 @@ rows only, and only on the columns available at the checkpoint.
 | Lot smaller than `min_lot_size` (valid rows) | `LOT_TOO_SMALL` | Implemented |
 | Lot MAD of a level ≤ per-parameter floor | `LOW_LEVEL_DISPERSION` | Implemented |
 | Lot MAD of a between-checkpoint difference ≤ floor | `LOW_DRIFT_DISPERSION` | Implemented |
-| Units consistent within a parameter | — | **Not implemented** — needs a unit convention decision |
+| Units consistent within a parameter | `UNIT_NOT_CONVERTIBLE`, `MIXED_UNITS` (SI-prefix conversion to the registry unit in `agnidrish.ingest`) | Implemented 2026-09-28 (ADR-007) |
+| Repeated reading for one component, parameter and checkpoint | `DUPLICATE_MEASUREMENT` | Implemented 2026-09-28 (ADR-007) |
 | Suspected multi-modal lot | — | **Not implemented** — rule and threshold need design + E2 bimodal-lot evidence |
 | Single-point glitch | — | **Not implemented** — T96 extension only |
 
 Thresholds (`min_lot_size`, per-parameter `scale_floor`, `physical_bounds`) have no
-defaults in code; they will live in `configs/data/` when the first script (E0) uses them.
+defaults in code; `min_lot_size` and the scale floor are set in `configs/experiments/pipeline_v1.yaml`;
+parameter limits, units and aliases are set per site in `configs/sites/`.
 
 ## 4. L1 — Absolute Specification Check
 

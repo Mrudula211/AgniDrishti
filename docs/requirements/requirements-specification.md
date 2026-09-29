@@ -1,8 +1,8 @@
 # Requirements Specification — AgniDrishti
 
-Status: Draft · Last updated: 2026-09-28
+Status: Draft · Last updated: 2026-09-29
 
-Requirements for the **future** system. Nothing here is implemented.
+Requirements for the system. Implementation status is stated per requirement (FR-01–FR-25 built as of 2026-09-29; evidence on synthetic data only).
 Each requirement cites its origin:
 
 - **PSR-xx** — PS requirement (as reported; see [problem-statement-analysis.md](../research/ps-analysis/problem-statement-analysis.md))

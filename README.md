@@ -27,17 +27,21 @@ prediction accuracy is scored by MAE against hidden ground-truth values.
 open decisions) and the plain-language team guides in
 [docs/team-understanding/](docs/team-understanding/problem-in-simple-language.md).
 
-## Proposed solution (provisional)
+## Solution (built; evaluated on synthetic data only)
 
 ```
 Data quality gate → Absolute spec check → Lot-relative analysis (level + drift)
-→ 168h prediction → Prediction interval (if it earns its place) → Ordered decision rules
+→ 168h prediction → 90 % prediction interval → Ordered decision rules
 → PASS / REVIEW / REJECT (+ binary flag) → Engineer-readable explanation
 ```
 
-Simple, transparent methods first (robust statistics, simple regression);
-advanced models only if an experiment shows they help. See
-[ADR-001](docs/decisions/ADR-001-initial-architecture.md).
+Simple, transparent methods first (robust statistics; four 168 h forecasters compared on validation MAE,
+of which a learned population increment beat least-squares regression; split-conformal ranges); every layer was measured against a simpler baseline on held-out lots, including the layers
+that did not add detection — [ablation-plan.md](docs/research/experiments/ablation-plan.md) §3–§5.
+Architecture: [ADR-001](docs/decisions/ADR-001-initial-architecture.md) (Rev. 1).
+
+**Idea-round deck:** [docs/presentation/sih2026-idea-agnidrishti.pdf](docs/presentation/sih2026-idea-agnidrishti.pdf) ·
+where every number on it comes from: [idea-submission-content.md](docs/presentation/idea-submission-content.md).
 
 ## Repository structure
 
@@ -74,10 +78,10 @@ app/                      Screening web service + QA-inspector UI (ADR-006)
 | Official dataset | Not found (verified) |
 | Claim classification | [claim-register.md](docs/research/claim-register.md) |
 | Prior art | Partly verified against primary sources (AEC-Q001, ESCC 9000, C&IE 2025, ESREL 2023, US 8,010,310, conformal literature) — [literature-review.md](docs/research/prior-art/literature-review.md). Lot-relative and burn-in drift screening are established prior art |
-| Safety slope / drift rate | Not defined by the PS; our definition in [ADR-002](docs/decisions/ADR-002-safety-slope-and-drift-rate.md) (accepted 2026-09-26; allowance value not yet set) |
+| Safety slope / drift rate | Not defined by the PS; our definition in [ADR-002](docs/decisions/ADR-002-safety-slope-and-drift-rate.md) (accepted 2026-09-26; Δallow = 15 % of the 0 h value in `configs/experiments/pipeline_v1.yaml`) |
 | Risks and PS gaps | [drawbacks-and-risks.md](docs/research/drawbacks-and-risks.md) |
 | Datasets | Official: none exists. External: NASA MOSFET + IGBT downloaded, checksummed and inspected — [external-datasets.md](docs/research/datasets/external-datasets.md), [compatibility](docs/research/datasets/external-dataset-compatibility.md). Synthetic: development v1 generated and E0-audited |
-| Architecture | Provisional |
+| Architecture | Built (ADR-001 Rev. 1); validated on synthetic data only |
 | Experiments | E0–E6 recorded on synthetic data — [ablation-plan.md](docs/research/experiments/ablation-plan.md) §3–§5 |
 
 ## Development phases
@@ -105,6 +109,23 @@ python scripts/run_experiments.py      # E1–E6 on validation lots -> artifacts
 python scripts/run_experiments.py --final artifacts/metrics/E1-E6_validation/<run>   # once, test lots
 python scripts/build_demo.py artifacts/metrics/E1-E6_test/<run>                      # demo page
 ```
+
+## Reproduce the deck's numbers
+
+```
+pip install -e ".[dev,serve]"          # without [serve], the API test module (4 tests) is skipped
+python -m pytest                       # 111 passed at 1f5d29a
+python scripts/generate_synthetic.py   # must print sha256 7a170d89…; run_experiments.py refuses any other file
+python scripts/run_experiments.py
+python scripts/run_experiments.py --final artifacts/metrics/E1-E6_validation/<run>
+```
+
+The generated file's SHA-256 (`7a170d89efb3ea8a…`, pre-registered in `configs/experiments/pipeline_v1.yaml`)
+was reproduced on 2026-09-29 on Windows 11 (Python 3.12, numpy 1.26.4 / pandas 2.2.2 and numpy 2.4.6 / pandas 2.3.3)
+and on Ubuntu 22.04 (Python 3.12, numpy 2.4.6 / pandas 2.3.3). The CSV stores full float precision, so a platform
+whose vectorised maths rounds a last bit differently (for example another CPU architecture) produces a different
+hash and the pre-registered run will not start. In that case use the exact 4 MB dataset file (attached to the
+repository's GitHub release `sih-idea-v1`) instead of regenerating it; check its SHA-256 before running.
 
 ## Prototype — screening service
 

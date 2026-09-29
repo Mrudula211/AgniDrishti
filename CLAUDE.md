@@ -714,13 +714,13 @@ Do not leave obsolete files merely because they were previously generated.
 
 P0 Research and requirements  (done 2026-09-26)
 P1 Dataset strategy and data validation  (done 2026-09-26)
-P2 Baselines  ← current (P2–P7 authorised together, one layer per change)
-P3 Lot-relative and trajectory analysis
-P4 168h prediction
-P5 Uncertainty and risk engine
-P6 Explainability
-P7 Application/demo
-P8 Presentation
+P2 Baselines  (done 2026-09-26; P2–P7 authorised together, one layer per change)
+P3 Lot-relative and trajectory analysis  (done 2026-09-26)
+P4 168h prediction  (done 2026-09-26)
+P5 Uncertainty and risk engine  (done 2026-09-26)
+P6 Explainability  (done 2026-09-26)
+P7 Application/demo  (done 2026-09-26; deployable service 2026-09-28)
+P8 Presentation  ← next (needs a team decision)
 
 Do not skip directly to P7.
 

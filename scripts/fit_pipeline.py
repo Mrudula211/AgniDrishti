@@ -139,6 +139,7 @@ def main() -> int:
     (out / "fit_metrics.json").write_text(json.dumps(to_jsonable(metrics), indent=2), encoding="utf-8")
     (out / "fit_summary.md").write_text(summary(res, meta), encoding="utf-8")
     log.info("wrote %s", (out / "pipeline.json").relative_to(REPO_ROOT))
+    sys.stdout.reconfigure(encoding="utf-8")  # the summaries contain →, Δ, ×; legacy Windows consoles default to cp1252
     print((out / "fit_summary.md").read_text(encoding="utf-8"))
     return 0
 

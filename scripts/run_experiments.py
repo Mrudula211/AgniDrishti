@@ -174,6 +174,7 @@ def main() -> int:
     cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
     run = final(cfg, (REPO_ROOT / args.final).resolve()) if args.final else development(cfg, cfg_path)
     log.info("recorded %s", run.relative_to(REPO_ROOT))
+    sys.stdout.reconfigure(encoding="utf-8")  # the summaries contain →, Δ, ×; legacy Windows consoles default to cp1252
     print((run / "summary.md").read_text(encoding="utf-8"))
     return 0
 

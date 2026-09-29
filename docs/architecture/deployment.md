@@ -103,6 +103,8 @@ single sign-on on the internal network. Run records contain measurement data. Pr
 | After the ADR-007 ingest redesign: site-config fit reproduces the recorded E6 pipeline; service reproduces all 2,368 recorded decisions and fired rules; replay identical | all identical | check of 2026-09-28 with `artifacts/models/pipeline/20260928-134603_4c2bad5` |
 | Same held-out lots exported in a different format (one row per reading, other column names, `;` delimiter, text hours) | identical decisions to the canonical upload | `tests/integration/test_api.py::test_foreign_export_is_inspected_mapped_and_screened` |
 | Automated tests | ingest, fit, service and API tests in `tests/` (111) | `python -m pytest` |
+| Fresh-clone check (2026-09-29): new virtual environment (Python 3.12, numpy 2.5.3, pandas 2.3.3), `pip install -e ".[dev,serve]"`, then the README steps | 111 tests pass; `generate_synthetic.py` reproduces the pre-registered dataset hash; E1–E6 development and final runs reproduce every cell of the recorded test table ([ablation-plan.md](../research/experiments/ablation-plan.md) §3); `scripts/serve.py` starts, the UI loads and the demo upload gives 14 REJECT / 247 REVIEW / 2,107 PASS | scratch clone of the committed branch, run on Windows 11 |
+| Python 3.11 (declared minimum) | not run locally (not installed); no 3.12-only syntax found by a tokenizer scan; CI matrix in `.github/workflows/tests.yml` covers 3.11 and 3.12 | first CI run: TBD |
 
 Detection performance on synthetic lots is in [ablation-plan.md](../research/experiments/ablation-plan.md) §3–§5
 (recall 0.800 at 10.4 % review on test; R* = 0.95 not reached). Nothing here is evidence about ISRO hardware.

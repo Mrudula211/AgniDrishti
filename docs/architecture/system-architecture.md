@@ -1,12 +1,14 @@
 # System Architecture (Provisional)
 
-Status: Proposed · Last updated: 2026-09-26 · Decision: [ADR-001](../decisions/ADR-001-initial-architecture.md)
+Status: Accepted (built; validated on synthetic data only) · Last updated: 2026-09-29 · Decision: [ADR-001](../decisions/ADR-001-initial-architecture.md)
 
 > Layer set revised 2026-09-26 (ADR-001 Revision 1): L3 merged into L2, no fused risk score, 7 layers.
 >
-> **Provisional.** Nothing here is implemented or validated. Each layer after
-> the absolute specification check stays in the design only if the ablation
-> ([ablation-plan.md](../research/experiments/ablation-plan.md)) shows it adds value.
+> **Implemented (P2–P7).** All layers are built and were measured in the cumulative ablation on
+> SYNTHETIC data ([ablation-plan.md](../research/experiments/ablation-plan.md) §3–§5); the layers that
+> did not add detection (L4, L5) are kept for the official Module B output and reported uncertainty, not for
+> detection. Nothing here is validated on official or ISRO hardware data.
+> Data ingestion and site configuration: [data-ingestion.md](data-ingestion.md) (ADR-007); deployment: [deployment.md](deployment.md) (ADR-006).
 
 ## 1. Pipeline
 
@@ -96,7 +98,7 @@ No directory is created until its first tested function exists.
 | Learned risk index (CRI) as probability | No real labels to calibrate (M-08) | Real labels available |
 | Digital twin / RUL | No time-to-failure data (N-05, N-06) | — |
 | GMM lot-modality check | Simpler checks first (M-07) | Simple checks fail on bimodal synthetic lots |
-| Web app / API / DB | Current phase (P0) | P7 |
+| Database | CLAUDE §0 (excluded) | A site needs queries across runs; the web app / API exist since P7 (ADR-006) |
 
 ## 7. Re-evaluation (2026-09-26, after verified prior-art pass)
 
